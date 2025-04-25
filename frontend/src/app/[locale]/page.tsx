@@ -1,12 +1,13 @@
-import {useTranslations} from 'next-intl';
+// src/app/[locale]/page.tsx
+import { getTranslations } from 'next-intl/server';
 
-export default function Home() {
-  const t = useTranslations('Index');
+export default async function HomePage() {
+  const t = await getTranslations('Home');
   
   return (
-    <main className="min-h-screen p-24">
-      <h1 className="text-4xl font-bold mb-6">{t('title')}</h1>
-      <p className="text-xl">{t('welcome')}</p>
+    <main>
+      <h1>{t('title')}</h1>
+      <p>{t('description')}</p>
     </main>
   );
 }

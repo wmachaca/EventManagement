@@ -1,4 +1,21 @@
 {
+  "Home": {
+    "title": "Gestor de Eventos Pro",
+    "description": "La solución definitiva para organizar y gestionar tus eventos",
+    "login": "Iniciar Sesión",
+    "register": "Registrarse"
+  },
+  "Metadata": {
     "title": "Gestor de Eventos",
-    "welcome": "Bienvenido"
+    "description": "Gestiona tus eventos con facilidad"
+  },
+  "Auth": {
+    "login": {
+      "title": "Bienvenido de nuevo",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "submit": "Iniciar Sesión",
+      "noAccount": "¿No tienes una cuenta?"
+    }
   }
+}

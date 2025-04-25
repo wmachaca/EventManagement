@@ -1,9 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Add this if using static export
-  // output: 'export' 
+  // Your Next.js config
 };
 
-const withNextIntl = require('next-intl/plugin')('./src/app/[locale]/i18n.ts');
+const withNextIntl = require('next-intl/plugin')(
+  './src/app/[locale]/i18n.ts' // Point directly to your config
+);
 
 module.exports = withNextIntl(nextConfig);
