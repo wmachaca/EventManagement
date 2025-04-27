@@ -6,7 +6,7 @@ export const locales = ['en', 'es'] as const;
 export type Locale = typeof locales[number];
 export const defaultLocale: Locale = 'en';
 
-let loggedLocales = new Set<Locale>();
+const loggedLocales = new Set<Locale>();
 
 // Make this function async to properly handle params
 export function isLocale(locale: string): locale is Locale {

@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Your Next.js config
+  reactStrictMode: true,
 };
 
 const withNextIntl = require('next-intl/plugin')(
