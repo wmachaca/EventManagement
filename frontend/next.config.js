@@ -5,7 +5,7 @@ const nextConfig = {
 };
 
 const withNextIntl = require('next-intl/plugin')(
-  './src/app/[locale]/i18n.ts' // Point directly to your config
+  './src/config/i18n.ts' // Point directly to your config
 );
 
 module.exports = withNextIntl(nextConfig);

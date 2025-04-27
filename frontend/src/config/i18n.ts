@@ -28,7 +28,7 @@ export function isLocale(locale: string): locale is Locale {
     loggedLocales.add(locale);
   }      
       try {
-      const messages = (await import(`../locales/${locale}.json`)).default;
+      const messages = (await import(`../public/locales/${locale}.json`)).default;
       return {
         locale,
         messages,
