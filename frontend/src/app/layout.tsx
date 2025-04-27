@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 
 import { redirect } from 'next/navigation';
 import { useRouter, usePathname } from 'next/navigation';
-import { defaultLocale } from './[locale]/i18n';
+import { defaultLocale } from '@/config/i18n';
 
 export default function RootLayout({
   children,
