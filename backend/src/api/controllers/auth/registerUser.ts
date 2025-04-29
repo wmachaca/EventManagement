@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { hashPassword } from '../../utils/password';
+import { hashPassword } from '../../../utils/password';
 import jwt from 'jsonwebtoken';
-import { prisma } from '../../database/client';
+import { prisma } from '../../../database/client';
 import { z } from 'zod';
 
 interface RegisterBody {
@@ -57,7 +57,6 @@ export const registerUser = async (req: Request<{}, {}, RegisterBody>, res: Resp
         email: true,
         provider: true,
         createdAt: true,
-        updatedAt: true,
       },
     });
 

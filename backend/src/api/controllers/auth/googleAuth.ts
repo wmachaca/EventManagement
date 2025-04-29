@@ -57,7 +57,11 @@ export const googleAuth = (req: Request, res: Response) => {
     console.error('GoogleAuth error:', error);
     return res.status(500).json({
       message: 'Authentication failed',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: process.env.NODE_ENV === 'development' 
+        ? error instanceof Error 
+          ? error.message 
+          : String(error)
+        : undefined,
     });
   }
 };

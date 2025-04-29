@@ -1,7 +1,7 @@
 // src/api/routes/authRoutes.ts
 import express from 'express';
 import passport from '../../config/passport';
-import { registerUser, loginUser, googleAuth } from '../controllers/authController';
+import { registerUser, loginUser, googleAuth } from '../controllers/auth/index';
 
 const router = express.Router();
 

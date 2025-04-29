@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { verifyPassword } from '../../utils/password';
-import { prisma } from '../../database/client';
-import { sanitizeUser } from '../../utils/authUtils';
+import { verifyPassword } from '../../../utils/password';
+import { prisma } from '../../../database/client';
+import { sanitizeUser } from '../../../utils/authUtils';
 
 interface LoginBody {
   email: string;
@@ -23,7 +23,8 @@ export const loginUser = async (req: Request<{}, {}, LoginBody>, res: Response) 
       include: { auth: true },
     });
 
-    if (!user?.auth) {
+    // Check if user exists and has auth record with password
+    if (!user?.auth?.password) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
