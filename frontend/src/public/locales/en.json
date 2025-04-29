@@ -15,7 +15,19 @@
       "email": "Email",
       "password": "Password",
       "submit": "Sign In",
-      "noAccount": "Don't have an account?"
+      "noAccount": "Don't have an account?",
+      "alreadyHaveAccount": "Already have an account?",
+      "loginLink": "Login here"
+    },
+    "register": {
+      "title": "Create an Account",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Sign Up",
+      "submitting": "Signing up...",
+      "alreadyHaveAccount": "Already have an account?",
+      "loginLink": "Log in"
     }
   }
 }
