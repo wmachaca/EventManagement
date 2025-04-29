@@ -15,7 +15,7 @@ if (!JWT_SECRET) {
 
 export const googleAuth = (req: Request, res: Response) => {
   try {
-    const user = req.user as GoogleUser;
+    const user = req.user as GoogleUser;// warning, this doesn't validate anything at runtime
     
     if (!user?.id) {
       console.error('GoogleAuth: Invalid user object', user);
