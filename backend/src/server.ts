@@ -3,7 +3,7 @@ import passport from './config/passport';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-//import eventRoutes from './api/routes/eventRoutes';
+import eventRoutes from './api/routes/eventRoutes';
 import authRoutes from './api/routes/authRoutes';
 import { filterAuthData } from './api/middleware/security';
 import dotenv from 'dotenv';
@@ -27,8 +27,8 @@ app.use(morgan('dev'));
 app.use(filterAuthData());
 
 // Routes
-//app.use('/api/events', eventRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/events', eventRoutes);
 
 // Error handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

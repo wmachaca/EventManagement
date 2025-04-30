@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-1.0.x", "debian-openssl-3.0.x"]
 }
 
@@ -9,46 +9,47 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  provider  String  @default("credentials") // "credentials" or "google"
-  googleId  String?  @unique
-  createdEvents Event[]  @relation("CreatedEvents")
-  attendingEvents Event[] @relation("EventAttendees")
-  auth      UserAuth? @relation(fields: [authId], references: [id])
-  authId    Int?      @unique  
-  createdAt DateTime @default(now())  
+  id              Int                @id @default(autoincrement())
+  name            String
+  email           String             @unique
+  provider        String             @default("credentials") // "credentials" or "google"
+  googleId        String?            @unique
+  createdEvents   Event[]            @relation("CreatedEvents")
+  attendingEvents Event[]            @relation("EventAttendees")
+  applications    EventApplication[]
+  auth            UserAuth?          @relation(fields: [authId], references: [id])
+  authId          Int?               @unique
+  createdAt       DateTime           @default(now())
 }
 
-
 model UserAuth {
-  id       Int     @id @default(autoincrement())
-  user     User?
-  password String?   // Nullable for OAuth users
-  salt     String?
-  resetToken String? // For password reset flows
+  id               Int       @id @default(autoincrement())
+  user             User?
+  password         String? // Nullable for OAuth users
+  salt             String?
+  resetToken       String? // For password reset flows
   resetTokenExpiry DateTime?
 }
 
-
 model Event {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  location    String?
-  schedule    DateTime
-  capacity    Int
-  isVirtual   Boolean    @default(false)
-  creatorId   Int
-  creator     User       @relation("CreatedEvents", fields: [creatorId], references: [id])
-  attendees   User[]     @relation("EventAttendees")
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  version     Int        @default(1) // For optimistic concurrency control
-  isDeleted   Boolean    @default(false) // Soft delete
-  deletedAt   DateTime?  // Timestamp for soft delete
-  
+  id           Int                @id @default(autoincrement())
+  name         String
+  description  String?
+  location     String?
+  schedule     DateTime
+  capacity     Int
+  isVirtual    Boolean            @default(false)
+  creatorId    Int
+  creator      User               @relation("CreatedEvents", fields: [creatorId], references: [id])
+  attendees    User[]             @relation("EventAttendees")
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  version      Int                @default(1) // For optimistic concurrency control
+  status       EventStatus        @default(DRAFT)
+  applications EventApplication[]
+  isDeleted    Boolean            @default(false) // Soft delete
+  deletedAt    DateTime? // Timestamp for soft delete
+
   @@unique([id, creatorId], name: "id_creatorId") // Compound key (optional but recommended for some queries)
 }
 
@@ -56,4 +57,23 @@ enum EventStatus {
   DRAFT
   PUBLISHED
   CANCELED
+}
+
+model EventApplication {
+  id        Int               @id @default(autoincrement())
+  eventId   Int
+  event     Event             @relation(fields: [eventId], references: [id])
+  userId    Int
+  user      User              @relation(fields: [userId], references: [id])
+  status    ApplicationStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@unique([eventId, userId])
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
