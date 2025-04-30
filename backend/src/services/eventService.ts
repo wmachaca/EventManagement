@@ -19,9 +19,12 @@ export const updateEvent = async (id: number, input: UpdateEventInput) => {
   });
 };
 
-export const getEventById = async (id: number) => {
+export const getEventById = async (id: number, includeDeleted = false) => {
   return prisma.event.findUnique({
-    where: { id },
+    where: { 
+      id,
+      isDeleted: includeDeleted ? undefined : false,
+    },
     include: {
       creator: true,
       applications: {
@@ -36,21 +39,60 @@ export const getEventById = async (id: number) => {
 export const listEvents = async (filter: {
   status?: 'DRAFT' | 'PUBLISHED' | 'CANCELED';
   creatorId?: number;
+  includeDeleted?: boolean; // New option  
 }) => {
   return prisma.event.findMany({
-    where: filter,
+    where: {
+      ...filter,
+      isDeleted: filter.includeDeleted ? undefined : false, // Exclude deleted unless requested
+    },
     include: {
       creator: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },    
+  });
+};
+
+export const deleteEvent = async (eventId: number, creatorId: number) => {
+  // Verify the event exists and belongs to the creator
+  const existingEvent = await prisma.event.findUnique({
+    where: { id: eventId },
+  });
+
+  if (!existingEvent || existingEvent.creatorId !== creatorId) {
+    throw new Error('Event not found or unauthorized');
+  }
+
+  // Perform soft delete
+  return prisma.event.update({
+    where: { id: eventId },
+    data: {
+      isDeleted: true,
+      deletedAt: new Date(),
+      status: 'CANCELED', // Optionally cancel the event when deleting
     },
   });
 };
 
-export const deleteEvent = async (id: number) => {
+export const restoreEvent = async (eventId: number, creatorId: number) => {
+  // Verify the event exists and belongs to the creator
+  const existingEvent = await prisma.event.findUnique({
+    where: { id: eventId },
+  });
+
+  if (!existingEvent || existingEvent.creatorId !== creatorId) {
+    throw new Error('Event not found or unauthorized');
+  }
+
+  // Restore the soft-deleted event
   return prisma.event.update({
-    where: { id },
+    where: { id: eventId },
     data: {
-      isDeleted: true,
-      deletedAt: new Date(),
+      isDeleted: false,
+      deletedAt: null,
+      status: 'DRAFT', // Or whatever status makes sense for your app
     },
   });
 };

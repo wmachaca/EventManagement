@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import {createEvent, listEvents, getEvent, updateEvent, applyToEvent,getApplications, updateApplicationStatus} from '../controllers/events/index';
+import {createEvent, listEvents, getEvent, updateEvent, applyToEvent,getApplications, updateApplicationStatus, deleteEvent, restoreEvent} from '../controllers/events/index';
 import { authMiddleware } from '../middleware/authMiddleware';
 import { isEventCreator, eventValidationRules, validate } from '../middleware/eventAccess';
 const router = Router();
@@ -17,5 +17,10 @@ router.put('/:id', isEventCreator, eventValidationRules, validate, updateEvent);
 router.post('/:eventId/apply', applyToEvent);
 router.get('/:eventId/applications', getApplications);
 router.put('/applications/:applicationId', updateApplicationStatus);
+// Delete route
+router.delete('/:id', deleteEvent);
+
+// Restore route 
+router.post('/:id/restore', restoreEvent);
 
 export default router;

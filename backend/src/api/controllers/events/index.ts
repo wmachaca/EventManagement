@@ -5,3 +5,5 @@ export { listEvents } from './listEvents';
 export { applyToEvent } from './applyToEvent';
 export { getApplications } from './getApplications';
 export { updateApplicationStatus } from './updateApplicationStatus';
+export {deleteEvent} from './deleteEvent'; // Add this
+export {restoreEvent} from './restoreEvent'; // Add this
