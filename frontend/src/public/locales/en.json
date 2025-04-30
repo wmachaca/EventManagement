@@ -11,13 +11,21 @@
   },
   "Auth": {
     "login": {
-      "title": "Welcome back",
+      "title": "Login",
       "email": "Email",
       "password": "Password",
-      "submit": "Sign In",
+      "submit": "Login",
+      "loading": "Logging in...",
+      "google": "Continue with Google",
+      "googleLoading": "Redirecting to Google...",
+      "or": "or",      
       "noAccount": "Don't have an account?",
       "alreadyHaveAccount": "Already have an account?",
-      "loginLink": "Login here"
+      "loginLink": "Login here",
+      "register": "Register here",
+      "invalidCredentials": "Invalid credentials. {attemptsLeft} attempts remaining.",
+      "attemptsExceeded": "Maximum attempts reached. Please try again later.",
+      "loginFailed": "Login failed. Please try again."      
     },
     "register": {
       "title": "Create an Account",
