@@ -5,8 +5,7 @@
   "main": "src/server.ts",
   "scripts": {
     "start": "tsc && node dist/server.js",
-    "dev": "nodemon --watch src/**/*.ts --exec \"node\" \"node_modules/ts-node/dist/bin.js\" src/server.ts",
-    "test": "cross-env NODE_ENV=test dotenv -e .env.test jest",
+    "dev": "nodemon --watch src --ext ts,json --exec ts-node src/server.ts",    "test": "cross-env NODE_ENV=test dotenv -e .env.test jest",
     "prisma:generate": "prisma generate",
     "postinstall": "npm run prisma:generate"
   },
