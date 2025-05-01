@@ -11,7 +11,7 @@ export const withAuth = (WrappedComponent: React.ComponentType) => {
 
     useEffect(() => {
       if (status === 'unauthenticated') {
-        router.push('/signin')
+        router.push('/login')
       }
     }, [status, router])
 
@@ -25,7 +25,7 @@ export const withAuth = (WrappedComponent: React.ComponentType) => {
 
 
     if (!session && ctx.res) {
-        ctx.res.writeHead(302, { Location: '/signin' })
+        ctx.res.writeHead(302, { Location: '/login' })
         ctx.res.end()
       }
 

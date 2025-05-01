@@ -1,6 +1,8 @@
 // src/app/[locale]/layout.tsx
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
+import { notFound } from 'next/navigation'; // Add this import
+
 
 export default async function LocaleLayout({
   children,

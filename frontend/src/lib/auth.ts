@@ -18,11 +18,13 @@ export const authOptions: NextAuthOptions = {
             email: credentials?.email,
             password: credentials?.password
           });
+
+          console.log('Login response from backend:', res.data);
           
-          if (res.data.success) {
+          if (res.data.token) {
             return { 
               id: res.data.userId, 
-              email: credentials?.email,
+              email: res.data.user.email,
               token: res.data.token 
             };
           }

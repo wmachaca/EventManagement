@@ -11,11 +11,33 @@
   },
   "Auth": {
     "login": {
-      "title": "Bienvenido de nuevo",
+      "title": "Iniciar sesión",
       "email": "Correo electrónico",
       "password": "Contraseña",
-      "submit": "Iniciar Sesión",
-      "noAccount": "¿No tienes una cuenta?"
+      "submit": "Iniciar sesión",
+      "loading": "Iniciando sesión...",
+      "google": "Continuar con Google",
+      "googleLoading": "Redirigiendo a Google...",
+      "or": "o",
+      "noAccount": "¿No tienes una cuenta?",
+      "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+      "loginLink": "Inicia sesión aquí",
+      "register": "Regístrate aquí",
+      "invalidCredentials": "Credenciales inválidas. Te quedan {attemptsLeft} intentos.",
+      "attemptsExceeded": "Límite de intentos alcanzado. Por favor inténtalo más tarde.",
+      "loginFailed": "Error al iniciar sesión. Por favor inténtalo de nuevo."
+    },
+    "register": {
+      "title": "Crear una cuenta",
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "submit": "Registrarse",
+      "submitting": "Creando cuenta...",
+      "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+      "loginHere": "Inicia sesión aquí",
+      "loginLink": "Inicia sesión aquí"
     }
   }
 }

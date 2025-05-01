@@ -29,13 +29,15 @@
     },
     "register": {
       "title": "Create an Account",
-      "email": "Email",
+      "name": "Name",      
+      "email": "Email Address",
       "password": "Password",
       "confirmPassword": "Confirm Password",
-      "submit": "Sign Up",
-      "submitting": "Signing up...",
+      "submit": "Register",
+      "submitting": "Creating account...",
       "alreadyHaveAccount": "Already have an account?",
-      "loginLink": "Log in"
+      "loginHere": "Login here",
+      "loginLink": "Login here"
     }
   }
 }
