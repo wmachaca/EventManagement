@@ -1,3 +1,6 @@
+// src/app/[locale]/(main)/events/page.tsx
+'use client'; // <-- Add this directive
+
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -134,7 +137,11 @@ export default function EventsPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
 
   if (!session) {
