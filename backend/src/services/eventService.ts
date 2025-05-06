@@ -4,11 +4,27 @@ import { CreateEventInput, UpdateEventInput } from '../models/event';
 const prisma = new PrismaClient();
 
 export const createEvent = async (input: CreateEventInput) => {
+  // Validate required creatorId
+  if (!input.creatorId) {
+    throw new Error('Creator ID is required');
+  }
+
   return prisma.event.create({
     data: {
-      ...input,
-      status: 'DRAFT', // Default status
+      name: input.name,
+      description: input.description,
+      location: input.location,
+      schedule: new Date(input.schedule), // Convert to Date object
+      capacity: input.capacity,
+      isVirtual: input.isVirtual,
+      status: input.status || 'DRAFT', // Default to DRAFT if not provided
+      creator: {
+        connect: { id: input.creatorId } // Properly connect the creator
+      }
     },
+    include: {
+      creator: true // Include creator in the response
+    }
   });
 };
 
@@ -122,6 +138,20 @@ export const getEventApplications = async (eventId: number) => {
     where: { eventId },
     include: {
       user: true,
+    },
+  });
+};
+
+export const getDeletedEventsByUserId = async (userId: number) => {
+  return prisma.event.findMany({
+    where: {
+      creatorId: userId,
+      deletedAt: {
+        not: null,
+      },
+    },
+    orderBy: {
+      deletedAt: 'desc',
     },
   });
 };

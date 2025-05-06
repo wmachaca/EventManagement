@@ -14,7 +14,7 @@ interface EventListProps {
 export default function EventList({
   events,
   deleteEvent,
-  currentUserId,
+  //currentUserId,
   updateEvent,
   isDeletedView = false,
   restoreEvent,
@@ -23,14 +23,15 @@ export default function EventList({
   const [typeFilter, setTypeFilter] = useState<'ALL' | 'VIRTUAL' | 'IN_PERSON'>('ALL');
 
   const filteredEvents = events.filter((event) => {
-    const isOwned = event.creatorId === currentUserId;
+    //const isOwned = event.creatorId === currentUserId;
     const statusMatch = statusFilter === 'ALL' || event.status === statusFilter;
     const typeMatch =
       typeFilter === 'ALL' ||
       (typeFilter === 'VIRTUAL' && event.isVirtual) ||
       (typeFilter === 'IN_PERSON' && !event.isVirtual);
 
-    return isOwned && statusMatch && typeMatch;
+    //return isOwned && statusMatch && typeMatch;
+    return statusMatch && typeMatch;
   });
 
   return (

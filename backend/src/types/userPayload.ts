@@ -1,6 +1,6 @@
 // src/types/UserPayload.ts
 export interface UserPayload {
-    id: number;
+    userId: number;
     email?: string;
     name?: string;
     role?: 'user' | 'admin'; // optional example

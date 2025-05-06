@@ -10,7 +10,7 @@ export const applyToEvent = async (req: Request, res: Response) => {
     }    
     const input: EventApplicationInput = {
       eventId: parseInt(req.params.eventId),
-      userId: req.user.id,
+      userId: req.user.userId,
     };
 
     const application = await eventService.applyToEvent(input.eventId, input.userId);

@@ -5,6 +5,7 @@ export interface CreateEventInput {
     name: string;
     description?: string;
     location?: string;
+    status?: EventStatus;
     schedule: Date;
     capacity: number;
     isVirtual: boolean;

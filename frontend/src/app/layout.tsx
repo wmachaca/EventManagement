@@ -8,6 +8,8 @@ import { redirect } from 'next/navigation';
 import { useRouter, usePathname } from 'next/navigation';
 import { defaultLocale } from '@/config/i18n';
 
+import { SessionProvider } from 'next-auth/react'; // useSession error
+
 export default function RootLayout({
   children,
 }: {
@@ -22,5 +24,11 @@ export default function RootLayout({
     }
   }, [pathname, router]);
 
-  return children;
+  return (
+    <html lang="en">
+      <body>
+        <SessionProvider>{children}</SessionProvider>
+      </body>
+    </html>
+  );
 }

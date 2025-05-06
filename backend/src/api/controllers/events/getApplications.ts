@@ -11,7 +11,7 @@ export const getApplications = async (req: Request, res: Response) => {
     const eventId = parseInt(req.params.eventId);
 
     const event = await eventService.getEventById(eventId);
-    if (!event || event.creatorId !== req.user.id) {
+    if (!event || event.creatorId !== req.user.userId) {
       return res.status(403).json({ message: 'Unauthorized' });
     }
 

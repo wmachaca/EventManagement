@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PencilIcon, TrashIcon, ArrowPathIcon, CalendarIcon, LocationMarkerIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, ArrowPathIcon, CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { Event, EventStatus } from '@/types/event';
 
 interface EventRowProps {
@@ -101,7 +101,7 @@ export default function EventRow({
               <span className="text-sm text-gray-500">Virtual Event</span>
             ) : (
               <>
-                <LocationMarkerIcon className="h-4 w-4 mr-1 text-gray-500" />
+                <MapPinIcon className="h-4 w-4 mr-1 text-gray-500" />
                 <span className="text-sm text-gray-500">{event.location || '-'}</span>
               </>
             )}

@@ -9,7 +9,7 @@ export const restoreEvent = async (req: Request, res: Response) => {
     }
 
     const eventId = parseInt(req.params.id);
-    const restoredEvent = await eventService.restoreEvent(eventId, req.user.id);
+    const restoredEvent = await eventService.restoreEvent(eventId, req.user.userId);
 
     if (!restoredEvent) {
       return res.status(404).json({ 

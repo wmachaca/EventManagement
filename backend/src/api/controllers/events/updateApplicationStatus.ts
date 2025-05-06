@@ -22,7 +22,7 @@ export const updateApplicationStatus = async (req: Request, res: Response) => {
       include: { event: true },
     });
 
-    if (!application || application.event.creatorId !== req.user.id) {
+    if (!application || application.event.creatorId !== req.user.userId) {
       return res.status(403).json({ message: 'Unauthorized' });
     }
 
