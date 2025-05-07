@@ -1,7 +1,9 @@
+// src/components/user-nav.tsx
 'use client';
 
 import { signOut } from 'next-auth/react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { usePathname } from 'next/navigation';
+import { Avatar} from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -11,22 +13,42 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import Link from 'next/link';
 
-export function UserNav({ user }: { user: { name: string; email: string; image?: string } }) {
+export function UserNav({ user }: { user?: { name: string; email: string; image?: string } }) {
+  const pathname = usePathname();
+
+  if (!user) return null; // Don't render anything if not logged in
+
   return (
     <div className="flex items-center gap-4">
+      {/* Welcome Message */}
+      <div className="hidden md:block">
+        <p className="text-sm sm:text-base">
+          Welcome, <span className="font-semibold">{user.name}</span>
+        </p>
+      </div>
+
+      {/* Event Links */}
+      <div className="flex items-center space-x-2 sm:space-x-4">
+        <NavLink href="/events/my" currentPath={pathname} label="My Events" />
+        <NavLink href="/events" currentPath={pathname} label="All Events" />
+        <NavLink href="/events/create" currentPath={pathname} label="Create Event" />
+      </div>
+
+      {/* Avatar Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={user.image} alt={user.name} />
-              <AvatarFallback>
-                {user.name
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')}
-              </AvatarFallback>
-            </Avatar>
+          <Avatar
+  className="h-8 w-8"
+  src={user.image || '/default-avatar.png'}
+  alt={user.name}
+  fallback={user.name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')}
+/>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end" forceMount>
@@ -45,5 +67,29 @@ export function UserNav({ user }: { user: { name: string; email: string; image?:
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
+  );
+}
+
+// Reuse the NavLink component
+function NavLink({
+  href,
+  currentPath,
+  label,
+}: {
+  href: string;
+  currentPath: string;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`text-sm font-medium transition-colors px-2 py-1 rounded ${
+        currentPath.startsWith(href)
+          ? 'bg-primary text-primary-foreground'
+          : 'hover:text-primary text-muted-foreground'
+      }`}
+    >
+      {label}
+    </Link>
   );
 }

@@ -1,32 +1,22 @@
+// src/components/main-nav.tsx
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 
-export function MainNav() {
-  const pathname = usePathname();
-  
-  const links = [
-    { href: '/events', label: 'Events' },
-    { href: '/settings', label: 'Settings' },
-    // Add more navigation links as needed
-  ];
-
+export function MainNav({ className }: { className?: string }) {
   return (
-    <nav className="flex items-center space-x-4 lg:space-x-6">
-      {links.map((link) => (
-        <Link
-          key={link.href}
-          href={link.href}
-          className={`text-sm font-medium transition-colors hover:text-primary ${
-            pathname.startsWith(link.href) 
-              ? 'text-black dark:text-white' 
-              : 'text-muted-foreground'
-          }`}
-        >
-          {link.label}
-        </Link>
-      ))}
-    </nav>
+    <div className={`flex items-center ${className ?? ''}`}>
+      <Link href="/" className="flex items-center">
+        <Image
+          src="/ratherLogo.jpg"
+          alt="Company Logo"
+          width={40}
+          height={40}
+          className="mr-2"
+        />
+        <span className="font-bold text-lg hidden sm:inline-block">EventPro</span>
+      </Link>
+    </div>
   );
 }

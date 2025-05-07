@@ -2,8 +2,11 @@
   "Home": {
     "title": "Event Manager Pro",
     "description": "The ultimate solution for organizing and managing your events",
-    "login": "Sign In",
-    "register": "Sign Up"
+    "getStarted": "Get Started",
+    "getStartedSubtitle": "Click here to begin managing your events",
+    "loginPrompt": "Please log in to manage your events",    
+    "login": "Login",
+    "register": "Register"
   },
   "Metadata": {
     "title": "Event Manager",
