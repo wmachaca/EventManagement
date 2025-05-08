@@ -13,11 +13,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useLocale } from 'next-intl';
 import Link from 'next/link';
 
 export function UserNav({ user }: { user?: { name: string; email: string; image?: string } }) {
   const pathname = usePathname();
-
+  const locale = useLocale();
   if (!user) return null; // Don't render anything if not logged in
 
   return (
@@ -31,9 +32,9 @@ export function UserNav({ user }: { user?: { name: string; email: string; image?
 
       {/* Event Links */}
       <div className="flex items-center space-x-2 sm:space-x-4">
-        <NavLink href="/events/my" currentPath={pathname} label="My Events" />
-        <NavLink href="/events" currentPath={pathname} label="All Events" />
-        <NavLink href="/events/create" currentPath={pathname} label="Create Event" />
+        <NavLink href={`/${locale}/events/myevents`} currentPath={pathname} label="My Events" />
+        <NavLink href={`/${locale}/events`} currentPath={pathname} label="All Events" />
+        <NavLink href={`/${locale}/events/create`} currentPath={pathname} label="Create Event" />
       </div>
 
       {/* Avatar Dropdown */}

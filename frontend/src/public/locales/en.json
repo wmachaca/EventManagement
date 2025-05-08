@@ -42,5 +42,15 @@
       "loginHere": "Login here",
       "loginLink": "Login here"
     }
-  }
+  },
+"Events": {
+  "myEvents": "My Events",
+  "createTitle": "Create New Event",  
+  "allEvents": "All Events",  
+"viewDeletedEvents": "See deleted events",  
+"deletedEvents": "Deleted events",  
+  "fetchError": "Failed to fetch your events",
+  "deleteError": "Failed to delete event",
+"backToActiveEvents": "Back Active Events"   
+}
 }
