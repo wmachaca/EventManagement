@@ -35,7 +35,7 @@ export default function MyEventsPage() {
   const fetchMyEvents = async () => {
     try {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/events/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/my`,
         {
           headers: {
             Authorization: `Bearer ${session?.accessToken}`,

@@ -70,6 +70,10 @@ export default function AllEventsPage() {
           <EventList
             events={events}
             currentUserId={Number(session?.user?.id) || 0}
+            deleteEvent={() => {}}
+            updateEvent={() => {}}
+            isDeletedView={false}
+            restoreEvent={() => {}}            
           />
         </div>
       </div>
