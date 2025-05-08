@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import {createEvent, listEvents, getEvent, updateEvent, applyToEvent,getApplications, updateApplicationStatus, deleteEvent, restoreEvent, getDeletedEvents} from '../controllers/events/index';
+import {createEvent, listMyEvents, listAllEvents, listEvents, getEvent, updateEvent, applyToEvent,getApplications, updateApplicationStatus, deleteEvent, restoreEvent, getDeletedEvents} from '../controllers/events/index';
 import { authMiddleware } from '../middleware/authMiddleware';
 import { isEventCreator, eventValidationRules, validate } from '../middleware/eventAccess';
 const router = Router();
@@ -9,7 +9,9 @@ router.use(authMiddleware);
 
 // Event CRUD
 router.post('/', eventValidationRules, validate, createEvent);
-router.get('/', listEvents);
+//router.get('/', listEvents);
+router.get('/my', listMyEvents);  
+router.get('/all', listAllEvents);  
 router.get('/trash', getDeletedEvents);
 router.get('/:id', getEvent);
 router.put('/:id', isEventCreator, eventValidationRules, validate, updateEvent);

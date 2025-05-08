@@ -6,10 +6,23 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
 export default function HomePage() {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const { status } = useSession();
+  const router = useRouter();  
   const t = useTranslations('Home');//HomePage
   const locale = useLocale();
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push(`/${locale}/events`);
+    }
+  }, [status, locale, router]);
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-50 to-indigo-50 flex flex-col">
       {/* Navigation */}

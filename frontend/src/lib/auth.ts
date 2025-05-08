@@ -25,6 +25,7 @@ export const authOptions: NextAuthOptions = {
             return { 
               id: res.data.userId, 
               email: res.data.user.email,
+              name: res.data.user.name,
               token: res.data.token 
             };
           }
@@ -53,6 +54,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.userId = user.id;
         token.accessToken = user.token;
+        token.name = user.name;
       }
       if (account?.provider === 'google' && account?.access_token) {
         // You might want to handle Google tokens differently
@@ -61,6 +63,7 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       session.user.id = token.userId ?? '';
+      session.user.name = token.name ?? '';
       session.accessToken = token.accessToken ?? '';
       return session;
     }

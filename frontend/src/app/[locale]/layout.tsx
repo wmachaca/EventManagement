@@ -5,8 +5,8 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { MainNav } from '@/components/main-nav';
 import { UserNav } from '@/components/user-nav';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+//import { getServerSession } from 'next-auth';
+//import { authOptions } from '@/lib/auth';
 
 export default async function LocaleLayout({
   children,
@@ -22,8 +22,8 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const session = await getServerSession(authOptions);
-  console.log('Server session:', session);// token saved in 
+  //const session = await getServerSession(authOptions);
+  //console.log('Server session:', session);// token saved in 
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
@@ -31,13 +31,7 @@ export default async function LocaleLayout({
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container flex h-16 items-center justify-between">
             <MainNav />
-            {session?.user && (
-              <UserNav user={{
-                name: session.user.name || '',
-                email: session.user.email || '',
-                image: session.user.image || undefined
-              }} />
-            )}
+            <UserNav />
           </div>
         </header>
         <main className="flex-1">{children}</main>

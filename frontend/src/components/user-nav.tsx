@@ -1,7 +1,7 @@
 // src/components/user-nav.tsx
 'use client';
 
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { Avatar} from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -16,24 +16,33 @@ import {
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
 
-export function UserNav({ user }: { user?: { name: string; email: string; image?: string } }) {
+export function UserNav() {
+  const { data: session, status } = useSession();  
   const pathname = usePathname();
   const locale = useLocale();
-  if (!user) return null; // Don't render anything if not logged in
+  const user = session?.user;
+
+  if (status === 'loading') return null; // Optional: show skeleton or spinner here
+  if (!user) return null;
+
+  console.log('this is the sessioninside user-nav', session);
 
   return (
     <div className="flex items-center gap-4">
       {/* Welcome Message */}
       <div className="hidden md:block">
         <p className="text-sm sm:text-base">
-          Welcome, <span className="font-semibold">{user.name}</span>
+          Welcome, 
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 font-extrabold text-2xl hover:drop-shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-all duration-300">
+          {user.name}
+                </span>
         </p>
       </div>
 
       {/* Event Links */}
       <div className="flex items-center space-x-2 sm:space-x-4">
         <NavLink href={`/${locale}/events/myevents`} currentPath={pathname} label="My Events" />
-        <NavLink href={`/${locale}/events`} currentPath={pathname} label="All Events" />
+        <NavLink href={`/${locale}/events/allevents`} currentPath={pathname} label="All Events" />
         <NavLink href={`/${locale}/events/create`} currentPath={pathname} label="Create Event" />
       </div>
 
@@ -44,11 +53,15 @@ export function UserNav({ user }: { user?: { name: string; email: string; image?
           <Avatar
   className="h-8 w-8"
   src={user.image || '/default-avatar.png'}
-  alt={user.name}
-  fallback={user.name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')}
+  alt={user.name || 'User'}
+  fallback={
+    user.name
+      ? user.name
+          .split(' ')
+          .map((n) => n[0])
+          .join('')
+      : '?'
+  }
 />
           </Button>
         </DropdownMenuTrigger>
@@ -62,7 +75,7 @@ export function UserNav({ user }: { user?: { name: string; email: string; image?
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => signOut()}>
+          <DropdownMenuItem onClick={() => signOut({ callbackUrl: `/${locale}` })}>
             Log out
           </DropdownMenuItem>
         </DropdownMenuContent>

@@ -1,4 +1,3 @@
-//event detail page
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -14,9 +13,12 @@ import {
   UsersIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ClockIcon
+  ClockIcon,
+  UserPlusIcon,
+  UserMinusIcon
 } from '@heroicons/react/24/outline';
 import { Event, EventStatus, EventApplication, ApplicationStatus } from '@/types/event';
+import { toast } from 'sonner';
 
 interface StatusConfig {
   color: string;
@@ -61,6 +63,8 @@ export default function EventDetailPage() {
   const [editedEvent, setEditedEvent] = useState<Partial<Event>>({});
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasApplied, setHasApplied] = useState(false);
+  const [isAttending, setIsAttending] = useState(false);
 
   // Initialize axios instance with auth header
   const axiosInstance = axios.create({
@@ -78,9 +82,16 @@ export default function EventDetailPage() {
       setEvent(data);
       setEditedEvent(data);
       setError(null);
+      
+      // Check if current user is attending
+      if (session?.user?.id) {
+        const isAttending = data.attendees?.some(attendee => attendee.id === Number(session.user.id));
+        setIsAttending(isAttending);
+      }
     } catch (err) {
       const error = err as AxiosError<{ message?: string }>;
       setError(error.response?.data?.message || 'Failed to load event details');
+      toast.error('Failed to load event details');
     } finally {
       setIsLoading(false);
     }
@@ -91,8 +102,15 @@ export default function EventDetailPage() {
     try {
       const { data } = await axiosInstance.get<EventApplication[]>(`/api/events/${id}/applications`);
       setApplications(data);
+      
+      // Check if current user has applied
+      if (session?.user?.id) {
+        const userApplication = data.find(app => app.userId === Number(session.user.id));
+        setHasApplied(!!userApplication);
+      }
     } catch (err) {
       console.error('Failed to load applications:', err);
+      toast.error('Failed to load applications');
     }
   };
 
@@ -105,9 +123,11 @@ export default function EventDetailPage() {
       setEditedEvent(data);
       setIsEditing(false);
       setError(null);
+      toast.success('Event updated successfully');
     } catch (err) {
       const error = err as AxiosError<{ message?: string }>;
       setError(error.response?.data?.message || 'Failed to update event');
+      toast.error('Failed to update event');
     } finally {
       setIsLoading(false);
     }
@@ -120,10 +140,12 @@ export default function EventDetailPage() {
     try {
       setIsLoading(true);
       await axiosInstance.delete(`/api/events/${id}`);
+      toast.success('Event deleted successfully');
       router.push('/events');
     } catch (err) {
       const error = err as AxiosError<{ message?: string }>;
       setError(error.response?.data?.message || 'Failed to delete event');
+      toast.error('Failed to delete event');
       setIsLoading(false);
     }
   };
@@ -136,9 +158,11 @@ export default function EventDetailPage() {
       setEvent(data);
       setEditedEvent(data);
       setError(null);
+      toast.success(`Event status changed to ${newStatus.toLowerCase()}`);
     } catch (err) {
       const error = err as AxiosError<{ message?: string }>;
       setError(error.response?.data?.message || 'Failed to update event status');
+      toast.error('Failed to update event status');
     } finally {
       setIsLoading(false);
     }
@@ -152,9 +176,45 @@ export default function EventDetailPage() {
         { status }
       );
       fetchApplications(); // Refresh applications list
+      toast.success(`Application ${status.toLowerCase()}`);
     } catch (err) {
       const error = err as AxiosError<{ message?: string }>;
       setError(error.response?.data?.message || 'Failed to update application status');
+      toast.error('Failed to update application status');
+    }
+  };
+
+  // Handle apply to event
+  const handleApply = async () => {
+    try {
+      setIsLoading(true);
+      await axiosInstance.post(`/api/events/${id}/apply`);
+      toast.success('Application submitted successfully');
+      fetchApplications(); // Refresh applications
+      fetchEvent(); // Refresh event data
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string }>;
+      setError(error.response?.data?.message || 'Failed to apply to event');
+      toast.error('Failed to apply to event');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle cancel application
+  const handleCancelApplication = async () => {
+    try {
+      setIsLoading(true);
+      await axiosInstance.delete(`/api/events/${id}/applications`);
+      toast.success('Application cancelled successfully');
+      fetchApplications(); // Refresh applications
+      fetchEvent(); // Refresh event data
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string }>;
+      setError(error.response?.data?.message || 'Failed to cancel application');
+      toast.error('Failed to cancel application');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -172,14 +232,15 @@ export default function EventDetailPage() {
     return null;
   }
 
-    // Loading states
-    if (authStatus === 'loading' || isLoading) {
-      return (
-        <div className="flex justify-center items-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      );
-    }
+  // Loading states
+  if (authStatus === 'loading' || isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
   // Error or not found states
   if (!event) {
     return (
@@ -204,6 +265,12 @@ export default function EventDetailPage() {
 
   const currentStatus = statusConfig[event.status];
   const isCreator = session?.user?.id === event.creatorId;
+  const isPublished = event.status === 'PUBLISHED';
+  const isFull = applications.filter(app => app.status === 'APPROVED').length >= event.capacity;
+
+  // Application status for current user
+  const userApplication = applications.find(app => app.userId === Number(session?.user?.id));
+  const applicationStatus = userApplication?.status;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -242,57 +309,89 @@ export default function EventDetailPage() {
               <h1 className="text-2xl font-bold text-gray-900 truncate">{event.name}</h1>
             )}
             
-            <div className="mt-2 flex items-center">
+            <div className="mt-2 flex items-center space-x-2">
               <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${currentStatus.color}`}>
                 <currentStatus.icon className="h-4 w-4 mr-1" />
                 {currentStatus.label}
               </span>
+              {isFull && isPublished && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                  Full
+                </span>
+              )}
             </div>
           </div>
 
           {/* Action buttons */}
-          {isCreator && (
-            <div className="flex space-x-2 ml-4">
-              {isEditing ? (
+          <div className="flex space-x-2 ml-4">
+            {isCreator ? (
+              <>
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={handleUpdate}
+                      className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+                      disabled={isLoading}
+                      aria-label="Save changes"
+                    >
+                      {isLoading ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      className="px-3 py-1 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+                      aria-label="Cancel editing"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="p-2 text-blue-600 hover:text-blue-800 transition-colors rounded-full hover:bg-blue-50"
+                      title="Edit event"
+                      aria-label="Edit event"
+                    >
+                      <PencilIcon className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={handleDelete}
+                      className="p-2 text-red-600 hover:text-red-800 transition-colors rounded-full hover:bg-red-50"
+                      title="Delete event"
+                      aria-label="Delete event"
+                    >
+                      <TrashIcon className="h-5 w-5" />
+                    </button>
+                  </>
+                )}
+              </>
+            ) : (
+              // Non-creator actions (apply/cancel)
+              isPublished && !isFull && (
                 <>
-                  <button
-                    onClick={handleUpdate}
-                    className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
-                    disabled={isLoading}
-                    aria-label="Save changes"
-                  >
-                    {isLoading ? 'Saving...' : 'Save'}
-                  </button>
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="px-3 py-1 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
-                    aria-label="Cancel editing"
-                  >
-                    Cancel
-                  </button>
+                  {hasApplied ? (
+                    <button
+                      onClick={handleCancelApplication}
+                      disabled={isLoading}
+                      className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
+                    >
+                      <UserMinusIcon className="h-5 w-5 mr-1" />
+                      {isLoading ? 'Processing...' : 'Cancel Application'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleApply}
+                      disabled={isLoading}
+                      className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50"
+                    >
+                      <UserPlusIcon className="h-5 w-5 mr-1" />
+                      {isLoading ? 'Processing...' : 'Apply to Event'}
+                    </button>
+                  )}
                 </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="p-2 text-blue-600 hover:text-blue-800 transition-colors rounded-full hover:bg-blue-50"
-                    title="Edit event"
-                    aria-label="Edit event"
-                  >
-                    <PencilIcon className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    className="p-2 text-red-600 hover:text-red-800 transition-colors rounded-full hover:bg-red-50"
-                    title="Delete event"
-                    aria-label="Delete event"
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
-                </>
-              )}
-            </div>
-          )}
+              )
+            )}
+          </div>
         </div>
 
         {/* Event details grid */}
@@ -390,10 +489,28 @@ export default function EventDetailPage() {
               />
             ) : (
               <p className="text-gray-700">
-                {event.capacity} {event.capacity === 1 ? 'attendee' : 'attendees'}
+                {applications.filter(app => app.status === 'APPROVED').length} / {event.capacity} attendees
               </p>
             )}
           </div>
+
+          {/* Current user's application status */}
+          {!isCreator && hasApplied && (
+            <div className="md:col-span-2">
+              <h2 className="text-lg font-medium text-gray-900 mb-2">Your Application</h2>
+              <div className="flex items-center">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  applicationStatus === 'APPROVED' 
+                    ? 'bg-green-100 text-green-800' 
+                    : applicationStatus === 'REJECTED' 
+                    ? 'bg-red-100 text-red-800' 
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}>
+                  {applicationStatus || 'PENDING'}
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Status action button */}
           {isCreator && !isEditing && (
@@ -414,62 +531,60 @@ export default function EventDetailPage() {
           )}
         </div>
 
-        {/* Applications section */}
-        <div className="border-t border-gray-200 px-6 py-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-              <UsersIcon className="h-5 w-5 mr-2 text-gray-500" />
-              Applications ({applications.length})
-            </h2>
-          </div>
+        {/* Applications section (only visible to creator) */}
+        {isCreator && (
+          <div className="border-t border-gray-200 px-6 py-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                <UsersIcon className="h-5 w-5 mr-2 text-gray-500" />
+                Applications ({applications.length})
+              </h2>
+            </div>
 
-          {applications.length === 0 ? (
-            <p className="text-gray-500 py-4 text-center">No applications yet</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Attendee
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    {isCreator && (
+            {applications.length === 0 ? (
+              <p className="text-gray-500 py-4 text-center">No applications yet</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Attendee
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {applications.map((application) => (
-                    <tr key={application.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {application.user.name}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {application.user.email}
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {applications.map((application) => (
+                      <tr key={application.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {application.user.name}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {application.user.email}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          application.status === 'APPROVED'
-                            ? 'bg-green-100 text-green-800'
-                            : application.status === 'REJECTED'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {application.status}
-                        </span>
-                      </td>
-                      {isCreator && (
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            application.status === 'APPROVED'
+                              ? 'bg-green-100 text-green-800'
+                              : application.status === 'REJECTED'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {application.status}
+                          </span>
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="space-x-2">
                             <button
@@ -490,15 +605,15 @@ export default function EventDetailPage() {
                             </button>
                           </div>
                         </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
-}  
+}

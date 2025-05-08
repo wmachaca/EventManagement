@@ -17,7 +17,7 @@ export default function EventsPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('{`/${locale}/events/create`}');
+      router.push(`/${locale}/events/create`);
     }
   }, [status, router]);
 

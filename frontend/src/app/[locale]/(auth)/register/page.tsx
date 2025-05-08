@@ -75,7 +75,7 @@ export default function RegisterPage() {
         // If auto-signin fails, just redirect to login
         router.push(`/${locale}/login?registered=true`);
       } else {
-        router.push(`/${locale}`); // Redirect to localized home
+        router.push(`/${locale}/events`); // Redirect to localized home
       }
     } catch (error) {
       console.error('Registration error:', error);
