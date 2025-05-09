@@ -38,4 +38,4 @@ frontend: npm run dev
 **Backend:** Node.js, Express, Prisma ORM  
 **Auth:** JWT, OAuth (e.g., Google)  
 **Database:** PostgreSQL  
-**DevOps:** Docker, ESLint, Prettier, Husky
+**DevOps:** Docker, ESLint, Prettier
