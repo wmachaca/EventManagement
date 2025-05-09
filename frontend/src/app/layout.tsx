@@ -10,11 +10,7 @@ import { defaultLocale } from '@/config/i18n';
 
 import { SessionProvider } from 'next-auth/react'; // useSession error
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 

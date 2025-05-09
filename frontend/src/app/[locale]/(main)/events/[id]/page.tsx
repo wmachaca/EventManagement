@@ -4,18 +4,18 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import axios, { AxiosError } from 'axios';
-import { 
-  PencilIcon, 
-  TrashIcon, 
+import {
+  PencilIcon,
+  TrashIcon,
   ArrowLeftIcon,
-  CalendarIcon, 
+  CalendarIcon,
   MapPinIcon,
   UsersIcon,
   CheckCircleIcon,
   XCircleIcon,
   ClockIcon,
   UserPlusIcon,
-  UserMinusIcon
+  UserMinusIcon,
 } from '@heroicons/react/24/outline';
 import { Event, EventStatus, EventApplication, ApplicationStatus } from '@/types/event';
 import { toast } from 'sonner';
@@ -34,22 +34,22 @@ const statusConfig: Record<EventStatus, StatusConfig> = {
     icon: ClockIcon,
     label: 'Draft',
     nextAction: 'Publish',
-    nextStatus: 'PUBLISHED'
+    nextStatus: 'PUBLISHED',
   },
   PUBLISHED: {
     color: 'bg-green-100 text-green-800',
     icon: CheckCircleIcon,
     label: 'Published',
     nextAction: 'Cancel',
-    nextStatus: 'CANCELED'
+    nextStatus: 'CANCELED',
   },
   CANCELED: {
     color: 'bg-red-100 text-red-800',
     icon: XCircleIcon,
     label: 'Canceled',
     nextAction: 'Publish',
-    nextStatus: 'PUBLISHED'
-  }
+    nextStatus: 'PUBLISHED',
+  },
 };
 
 export default function EventDetailPage() {
@@ -82,10 +82,12 @@ export default function EventDetailPage() {
       setEvent(data);
       setEditedEvent(data);
       setError(null);
-      
+
       // Check if current user is attending
       if (session?.user?.id) {
-        const isAttending = data.attendees?.some(attendee => attendee.id === Number(session.user.id));
+        const isAttending = data.attendees?.some(
+          attendee => attendee.id === Number(session.user.id),
+        );
         setIsAttending(isAttending);
       }
     } catch (err) {
@@ -100,9 +102,11 @@ export default function EventDetailPage() {
   // Fetch applications
   const fetchApplications = async () => {
     try {
-      const { data } = await axiosInstance.get<EventApplication[]>(`/api/events/${id}/applications`);
+      const { data } = await axiosInstance.get<EventApplication[]>(
+        `/api/events/${id}/applications`,
+      );
       setApplications(data);
-      
+
       // Check if current user has applied
       if (session?.user?.id) {
         const userApplication = data.find(app => app.userId === Number(session.user.id));
@@ -136,7 +140,7 @@ export default function EventDetailPage() {
   // Handle event deletion
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this event?')) return;
-    
+
     try {
       setIsLoading(true);
       await axiosInstance.delete(`/api/events/${id}`);
@@ -154,7 +158,9 @@ export default function EventDetailPage() {
   const handleStatusChange = async (newStatus: EventStatus) => {
     try {
       setIsLoading(true);
-      const { data } = await axiosInstance.patch<Event>(`/api/events/${id}/status`, { status: newStatus });
+      const { data } = await axiosInstance.patch<Event>(`/api/events/${id}/status`, {
+        status: newStatus,
+      });
       setEvent(data);
       setEditedEvent(data);
       setError(null);
@@ -169,12 +175,12 @@ export default function EventDetailPage() {
   };
 
   // Handle application status change
-  const handleApplicationStatusChange = async (applicationId: number, status: ApplicationStatus) => {
+  const handleApplicationStatusChange = async (
+    applicationId: number,
+    status: ApplicationStatus,
+  ) => {
     try {
-      await axiosInstance.put(
-        `/api/events/${id}/applications/${applicationId}/status`,
-        { status }
-      );
+      await axiosInstance.put(`/api/events/${id}/applications/${applicationId}/status`, { status });
       fetchApplications(); // Refresh applications list
       toast.success(`Application ${status.toLowerCase()}`);
     } catch (err) {
@@ -250,7 +256,8 @@ export default function EventDetailPage() {
             {error ? 'Error Loading Event' : 'Event Not Found'}
           </h1>
           <p className="text-gray-600 mb-6">
-            {error || "The event you're looking for doesn't exist or you don't have permission to view it."}
+            {error ||
+              "The event you're looking for doesn't exist or you don't have permission to view it."}
           </p>
           <button
             onClick={() => router.push('/events')}
@@ -284,7 +291,7 @@ export default function EventDetailPage() {
           <ArrowLeftIcon className="h-5 w-5 mr-1" />
           Back to Events
         </button>
-        
+
         {error && (
           <div className="ml-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
             {error}
@@ -301,16 +308,18 @@ export default function EventDetailPage() {
               <input
                 type="text"
                 value={editedEvent.name || ''}
-                onChange={(e) => setEditedEvent({ ...editedEvent, name: e.target.value })}
+                onChange={e => setEditedEvent({ ...editedEvent, name: e.target.value })}
                 className="text-2xl font-bold w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                 aria-label="Event name"
               />
             ) : (
               <h1 className="text-2xl font-bold text-gray-900 truncate">{event.name}</h1>
             )}
-            
+
             <div className="mt-2 flex items-center space-x-2">
-              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${currentStatus.color}`}>
+              <span
+                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${currentStatus.color}`}
+              >
                 <currentStatus.icon className="h-4 w-4 mr-1" />
                 {currentStatus.label}
               </span>
@@ -367,7 +376,8 @@ export default function EventDetailPage() {
               </>
             ) : (
               // Non-creator actions (apply/cancel)
-              isPublished && !isFull && (
+              isPublished &&
+              !isFull && (
                 <>
                   {hasApplied ? (
                     <button
@@ -402,14 +412,16 @@ export default function EventDetailPage() {
             {isEditing ? (
               <textarea
                 value={editedEvent.description || ''}
-                onChange={(e) => setEditedEvent({ ...editedEvent, description: e.target.value })}
+                onChange={e => setEditedEvent({ ...editedEvent, description: e.target.value })}
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 min-h-[120px]"
                 placeholder="Enter event description..."
                 aria-label="Event description"
               />
             ) : (
               <p className="text-gray-700 whitespace-pre-line">
-                {event.description || <span className="italic text-gray-400">No description provided</span>}
+                {event.description || (
+                  <span className="italic text-gray-400">No description provided</span>
+                )}
               </p>
             )}
           </div>
@@ -424,10 +436,12 @@ export default function EventDetailPage() {
               <input
                 type="datetime-local"
                 value={editedEvent.schedule?.slice(0, 16) || ''}
-                onChange={(e) => setEditedEvent({ 
-                  ...editedEvent, 
-                  schedule: e.target.value 
-                })}
+                onChange={e =>
+                  setEditedEvent({
+                    ...editedEvent,
+                    schedule: e.target.value,
+                  })
+                }
                 className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                 aria-label="Event date and time"
               />
@@ -439,7 +453,7 @@ export default function EventDetailPage() {
                   month: 'long',
                   day: 'numeric',
                   hour: '2-digit',
-                  minute: '2-digit'
+                  minute: '2-digit',
                 })}
               </p>
             )}
@@ -456,14 +470,16 @@ export default function EventDetailPage() {
                 <input
                   type="text"
                   value={editedEvent.location || ''}
-                  onChange={(e) => setEditedEvent({ ...editedEvent, location: e.target.value })}
+                  onChange={e => setEditedEvent({ ...editedEvent, location: e.target.value })}
                   className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter location..."
                   aria-label="Event location"
                 />
               ) : (
                 <p className="text-gray-700">
-                  {event.location || <span className="italic text-gray-400">No location specified</span>}
+                  {event.location || (
+                    <span className="italic text-gray-400">No location specified</span>
+                  )}
                 </p>
               )}
             </div>
@@ -480,16 +496,19 @@ export default function EventDetailPage() {
                 type="number"
                 min="1"
                 value={editedEvent.capacity || 0}
-                onChange={(e) => setEditedEvent({ 
-                  ...editedEvent, 
-                  capacity: Number(e.target.value) 
-                })}
+                onChange={e =>
+                  setEditedEvent({
+                    ...editedEvent,
+                    capacity: Number(e.target.value),
+                  })
+                }
                 className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                 aria-label="Event capacity"
               />
             ) : (
               <p className="text-gray-700">
-                {applications.filter(app => app.status === 'APPROVED').length} / {event.capacity} attendees
+                {applications.filter(app => app.status === 'APPROVED').length} / {event.capacity}{' '}
+                attendees
               </p>
             )}
           </div>
@@ -499,13 +518,15 @@ export default function EventDetailPage() {
             <div className="md:col-span-2">
               <h2 className="text-lg font-medium text-gray-900 mb-2">Your Application</h2>
               <div className="flex items-center">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  applicationStatus === 'APPROVED' 
-                    ? 'bg-green-100 text-green-800' 
-                    : applicationStatus === 'REJECTED' 
-                    ? 'bg-red-100 text-red-800' 
-                    : 'bg-yellow-100 text-yellow-800'
-                }`}>
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    applicationStatus === 'APPROVED'
+                      ? 'bg-green-100 text-green-800'
+                      : applicationStatus === 'REJECTED'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                  }`}
+                >
                   {applicationStatus || 'PENDING'}
                 </span>
               </div>
@@ -518,8 +539,8 @@ export default function EventDetailPage() {
               <button
                 onClick={() => handleStatusChange(currentStatus.nextStatus)}
                 className={`px-4 py-2 rounded-md text-white ${
-                  currentStatus.nextStatus === 'PUBLISHED' 
-                    ? 'bg-green-600 hover:bg-green-700' 
+                  currentStatus.nextStatus === 'PUBLISHED'
+                    ? 'bg-green-600 hover:bg-green-700'
                     : 'bg-red-600 hover:bg-red-700'
                 } transition-colors disabled:opacity-50`}
                 disabled={isLoading}
@@ -560,7 +581,7 @@ export default function EventDetailPage() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {applications.map((application) => (
+                    {applications.map(application => (
                       <tr key={application.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
@@ -568,27 +589,29 @@ export default function EventDetailPage() {
                               <div className="text-sm font-medium text-gray-900">
                                 {application.user.name}
                               </div>
-                              <div className="text-sm text-gray-500">
-                                {application.user.email}
-                              </div>
+                              <div className="text-sm text-gray-500">{application.user.email}</div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            application.status === 'APPROVED'
-                              ? 'bg-green-100 text-green-800'
-                              : application.status === 'REJECTED'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}>
+                          <span
+                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              application.status === 'APPROVED'
+                                ? 'bg-green-100 text-green-800'
+                                : application.status === 'REJECTED'
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-yellow-100 text-yellow-800'
+                            }`}
+                          >
                             {application.status}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="space-x-2">
                             <button
-                              onClick={() => handleApplicationStatusChange(application.id, 'APPROVED')}
+                              onClick={() =>
+                                handleApplicationStatusChange(application.id, 'APPROVED')
+                              }
                               disabled={application.status === 'APPROVED' || isLoading}
                               className="text-green-600 hover:text-green-900 disabled:opacity-50"
                               aria-label={`Approve ${application.user.name}'s application`}
@@ -596,7 +619,9 @@ export default function EventDetailPage() {
                               Approve
                             </button>
                             <button
-                              onClick={() => handleApplicationStatusChange(application.id, 'REJECTED')}
+                              onClick={() =>
+                                handleApplicationStatusChange(application.id, 'REJECTED')
+                              }
                               disabled={application.status === 'REJECTED' || isLoading}
                               className="text-red-600 hover:text-red-900 disabled:opacity-50"
                               aria-label={`Reject ${application.user.name}'s application`}

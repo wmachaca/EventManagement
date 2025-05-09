@@ -2,12 +2,11 @@ import { Request, Response } from 'express';
 import * as eventService from '../../../services/eventService';
 import { isAuthenticated } from '../../../types/authenticatedRequest';
 
-
 export const getApplications = async (req: Request, res: Response) => {
   try {
     if (!isAuthenticated(req)) {
       return res.status(401).json({ message: 'Unauthorized' });
-    }       
+    }
     const eventId = parseInt(req.params.eventId);
 
     const event = await eventService.getEventById(eventId);

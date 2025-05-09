@@ -4,19 +4,18 @@ import { PrismaClient } from '@prisma/client';
 import { body, validationResult } from 'express-validator';
 import { isAuthenticated } from '../../types/authenticatedRequest';
 
-
 const prisma = new PrismaClient();
 
 // Middleware to check if user is the event creator
 export const isEventCreator = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!isAuthenticated(req)) {
-        return res.status(401).json({ message: 'Unauthorized' });
-      }      
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
     const eventId = parseInt(req.params.eventId || req.params.id);
     if (isNaN(eventId)) {
       return res.status(400).json({ message: 'Invalid event ID' });
-    }    
+    }
     const event = await prisma.event.findUnique({
       where: { id: eventId },
     });
@@ -31,7 +30,7 @@ export const isEventCreator = async (req: Request, res: Response, next: NextFunc
 
     next();
   } catch (error) {
-    console.error('Error in isEventCreator:', error);    
+    console.error('Error in isEventCreator:', error);
     res.status(500).json({ message: 'Error verifying event ownership', error });
   }
 };
@@ -45,24 +44,21 @@ export const eventValidationRules = [
     .withMessage('Event name is required')
     .isLength({ max: 100 })
     .withMessage('Name must be less than 100 characters'),
-  
+
   body('schedule')
     .notEmpty()
     .withMessage('Event schedule is required')
     .isISO8601()
     .withMessage('Invalid date format. Use ISO8601 (e.g., YYYY-MM-DDTHH:MM)')
-    .custom((value) => {
+    .custom(value => {
       const scheduledDate = new Date(value);
       if (scheduledDate < new Date()) {
         throw new Error('Event schedule must be in the future');
       }
       return true;
     }),
-  
-  body('capacity')
-    .isInt({ min: 1 })
-    .withMessage('Capacity must be a positive integer')
-    .toInt(),
+
+  body('capacity').isInt({ min: 1 }).withMessage('Capacity must be a positive integer').toInt(),
 
   // Optional fields with validation
   body('description')
@@ -70,7 +66,7 @@ export const eventValidationRules = [
     .trim()
     .isLength({ max: 2000 })
     .withMessage('Description must be less than 2000 characters'),
-  
+
   body('location')
     .optional()
     .trim()
@@ -82,13 +78,9 @@ export const eventValidationRules = [
       }
       return true;
     }),
-  
-  body('isVirtual')
-    .optional()
-    .isBoolean()
-    .withMessage('Virtual flag must be boolean')
-    .toBoolean(),
-  
+
+  body('isVirtual').optional().isBoolean().withMessage('Virtual flag must be boolean').toBoolean(),
+
   body('status')
     .optional()
     .isIn(['DRAFT', 'PUBLISHED', 'CANCELED'])
@@ -107,19 +99,19 @@ export const validate = (req: Request, res: Response, next: NextFunction) => {
         return {
           field: error.param,
           message: error.msg,
-          value: 'value' in error ? error.value : undefined
+          value: 'value' in error ? error.value : undefined,
         };
       }
       return {
         field: 'unknown',
         message: 'Validation error',
-        value: undefined
+        value: undefined,
       };
     });
-    
-    return res.status(400).json({ 
+
+    return res.status(400).json({
       message: 'Validation failed',
-      errors: formattedErrors 
+      errors: formattedErrors,
     });
   }
   next();

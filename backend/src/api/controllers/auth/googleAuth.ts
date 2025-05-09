@@ -15,8 +15,8 @@ if (!JWT_SECRET) {
 
 export const googleAuth = (req: Request, res: Response) => {
   try {
-    const user = req.user as GoogleUser;// warning, this doesn't validate anything at runtime
-    
+    const user = req.user as GoogleUser; // warning, this doesn't validate anything at runtime
+
     if (!user?.id) {
       console.error('GoogleAuth: Invalid user object', user);
       throw new Error('Invalid user data from Google authentication');
@@ -32,7 +32,7 @@ export const googleAuth = (req: Request, res: Response) => {
         exp: Math.floor(Date.now() / 1000) + 3600,
       },
       JWT_SECRET,
-      { algorithm: 'HS256' }
+      { algorithm: 'HS256' },
     );
 
     const frontendUrl = process.env.FRONTEND_URL;
@@ -57,11 +57,12 @@ export const googleAuth = (req: Request, res: Response) => {
     console.error('GoogleAuth error:', error);
     return res.status(500).json({
       message: 'Authentication failed',
-      error: process.env.NODE_ENV === 'development' 
-        ? error instanceof Error 
-          ? error.message 
-          : String(error)
-        : undefined,
+      error:
+        process.env.NODE_ENV === 'development'
+          ? error instanceof Error
+            ? error.message
+            : String(error)
+          : undefined,
     });
   }
 };

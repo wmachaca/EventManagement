@@ -30,14 +30,11 @@ export default function AllEventsPage() {
 
   const fetchAllEvents = async () => {
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/events/all`,
-        {
-          headers: {
-            Authorization: `Bearer ${session?.accessToken}`,
-          },
-        }
-      );
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/events/all`, {
+        headers: {
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+      });
       setEvents(response.data);
       setIsLoading(false);
     } catch (err) {
@@ -59,7 +56,7 @@ export default function AllEventsPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-100 to-blue-200 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">{t('allEvents')}</h1>
-        
+
         {error && (
           <div className="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
             {error}
@@ -73,7 +70,7 @@ export default function AllEventsPage() {
             deleteEvent={() => {}}
             updateEvent={() => {}}
             isDeletedView={false}
-            restoreEvent={() => {}}            
+            restoreEvent={() => {}}
           />
         </div>
       </div>

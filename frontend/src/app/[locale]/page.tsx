@@ -13,8 +13,8 @@ import { useEffect } from 'react';
 export default function HomePage() {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const { status } = useSession();
-  const router = useRouter();  
-  const t = useTranslations('Home');//HomePage
+  const router = useRouter();
+  const t = useTranslations('Home'); //HomePage
   const locale = useLocale();
 
   useEffect(() => {

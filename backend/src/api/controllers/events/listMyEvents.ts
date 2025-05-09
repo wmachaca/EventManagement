@@ -11,7 +11,7 @@ export const listMyEvents = async (req: Request, res: Response) => {
 
     const filter = {
       creatorId: req.user.userId,
-      status: req.query.status as 'DRAFT' | 'PUBLISHED' | 'CANCELED'
+      status: req.query.status as 'DRAFT' | 'PUBLISHED' | 'CANCELED',
     };
 
     const events = await eventService.listEvents(filter);

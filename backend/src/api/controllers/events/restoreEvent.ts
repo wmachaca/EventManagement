@@ -12,8 +12,8 @@ export const restoreEvent = async (req: Request, res: Response) => {
     const restoredEvent = await eventService.restoreEvent(eventId, req.user.userId);
 
     if (!restoredEvent) {
-      return res.status(404).json({ 
-        message: 'Event not found or you are not the creator' 
+      return res.status(404).json({
+        message: 'Event not found or you are not the creator',
       });
     }
 
@@ -28,8 +28,8 @@ export const restoreEvent = async (req: Request, res: Response) => {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    
-    res.status(500).json({ 
+
+    res.status(500).json({
       success: false,
       message: 'Failed to restore event',
       error: errorMessage,

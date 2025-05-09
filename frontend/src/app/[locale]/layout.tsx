@@ -10,7 +10,7 @@ import { UserNav } from '@/components/user-nav';
 
 export default async function LocaleLayout({
   children,
-  params: { locale }
+  params: { locale },
 }: {
   children: ReactNode;
   params: { locale: string };
@@ -23,7 +23,7 @@ export default async function LocaleLayout({
   }
 
   //const session = await getServerSession(authOptions);
-  //console.log('Server session:', session);// token saved in 
+  //console.log('Server session:', session);// token saved in
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>

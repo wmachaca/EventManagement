@@ -22,7 +22,7 @@ export default function EventList({
   const [statusFilter, setStatusFilter] = useState<EventStatus | 'ALL'>('ALL');
   const [typeFilter, setTypeFilter] = useState<'ALL' | 'VIRTUAL' | 'IN_PERSON'>('ALL');
 
-  const filteredEvents = events.filter((event) => {
+  const filteredEvents = events.filter(event => {
     //const isOwned = event.creatorId === currentUserId;
     const statusMatch = statusFilter === 'ALL' || event.status === statusFilter;
     const typeMatch =
@@ -48,7 +48,7 @@ export default function EventList({
             </label>
             <select
               id="status-filter"
-              onChange={(e) => setStatusFilter(e.target.value as EventStatus | 'ALL')}
+              onChange={e => setStatusFilter(e.target.value as EventStatus | 'ALL')}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-full"
               value={statusFilter}
             >
@@ -65,7 +65,7 @@ export default function EventList({
             </label>
             <select
               id="type-filter"
-              onChange={(e) => setTypeFilter(e.target.value as 'ALL' | 'VIRTUAL' | 'IN_PERSON')}
+              onChange={e => setTypeFilter(e.target.value as 'ALL' | 'VIRTUAL' | 'IN_PERSON')}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-full"
               value={typeFilter}
             >

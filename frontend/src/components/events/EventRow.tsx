@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import { PencilIcon, TrashIcon, ArrowPathIcon, CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import {
+  PencilIcon,
+  TrashIcon,
+  ArrowPathIcon,
+  CalendarIcon,
+  MapPinIcon,
+} from '@heroicons/react/24/outline';
 import { Event, EventStatus } from '@/types/event';
 
 interface EventRowProps {
@@ -56,9 +62,7 @@ export default function EventRow({
             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
           />
         ) : (
-          <div className="text-sm font-medium text-gray-900">
-            {event.name}
-          </div>
+          <div className="text-sm font-medium text-gray-900">{event.name}</div>
         )}
       </td>
 

@@ -34,14 +34,11 @@ export default function MyEventsPage() {
 
   const fetchMyEvents = async () => {
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/events/my`,
-        {
-          headers: {
-            Authorization: `Bearer ${session?.accessToken}`,
-          },
-        }
-      );
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/events/my`, {
+        headers: {
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+      });
       setEvents(response.data);
       setIsLoading(false);
     } catch (err) {
@@ -87,16 +84,16 @@ export default function MyEventsPage() {
           headers: {
             Authorization: `Bearer ${session?.accessToken}`,
           },
-        }
+        },
       );
-      setEvents(events.map(event => event.id === updatedEvent.id ? response.data : event));
+      setEvents(events.map(event => (event.id === updatedEvent.id ? response.data : event)));
       setError(null);
     } catch (err) {
       console.error(err);
       setError(t('updateError') || 'Failed to update event');
     }
   };
-  
+
   const restoreEvent = async (id: number) => {
     try {
       const response = await axios.post(
@@ -106,7 +103,7 @@ export default function MyEventsPage() {
           headers: {
             Authorization: `Bearer ${session?.accessToken}`,
           },
-        }
+        },
       );
       setDeletedEvents(deletedEvents.filter(event => event.id !== id));
       setEvents([...events, response.data]);
@@ -129,7 +126,7 @@ export default function MyEventsPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-100 to-blue-200 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">{t('myEvents')}</h1>
-        
+
         {error && (
           <div className="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
             {error}
@@ -137,52 +134,52 @@ export default function MyEventsPage() {
         )}
 
         <div className="bg-white p-6 rounded-xl shadow-md">
-        <div className="mb-6 flex justify-between items-center">
-  <h1 className="text-3xl font-bold text-gray-800">
-    {showDeleted ? t('deletedEvents') : t('myEvents')}
-  </h1>
-  <button
-    onClick={() => setShowDeleted(!showDeleted)}
-    className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
-  >
-    {showDeleted ? (
-      <>
-        <ArrowPathIcon className="h-5 w-5" />
-        <span>{t('backToActiveEvents')}</span>
-      </>
-    ) : (
-      <>
-        <TrashIcon className="h-5 w-5" />
-        <span>{t('viewDeletedEvents')}</span>
-      </>
-    )}
-  </button>
-</div>            
-{showDeleted ? (
-  <div className="bg-white p-6 rounded-xl shadow-md">
-    {deletedEvents.length === 0 ? (
-      <p className="text-gray-500">{t('noDeletedEvents')}</p>
-    ) : (
-      <EventList
-        events={deletedEvents}
-        currentUserId={Number(session?.user?.id) || 0}
-        deleteEvent={deleteEvent}
-        updateEvent={undefined}
-        restoreEvent={restoreEvent}
-        isDeletedView={true}
-      />
-    )}
-  </div>
-) : (
-  <div className="bg-white p-6 rounded-xl shadow-md">
-    <EventList
-      events={events}
-      currentUserId={Number(session?.user?.id) || 0}
-      deleteEvent={deleteEvent}
-      updateEvent={updateEvent}
-    />
-  </div>
-)}
+          <div className="mb-6 flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-gray-800">
+              {showDeleted ? t('deletedEvents') : t('myEvents')}
+            </h1>
+            <button
+              onClick={() => setShowDeleted(!showDeleted)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
+            >
+              {showDeleted ? (
+                <>
+                  <ArrowPathIcon className="h-5 w-5" />
+                  <span>{t('backToActiveEvents')}</span>
+                </>
+              ) : (
+                <>
+                  <TrashIcon className="h-5 w-5" />
+                  <span>{t('viewDeletedEvents')}</span>
+                </>
+              )}
+            </button>
+          </div>
+          {showDeleted ? (
+            <div className="bg-white p-6 rounded-xl shadow-md">
+              {deletedEvents.length === 0 ? (
+                <p className="text-gray-500">{t('noDeletedEvents')}</p>
+              ) : (
+                <EventList
+                  events={deletedEvents}
+                  currentUserId={Number(session?.user?.id) || 0}
+                  deleteEvent={deleteEvent}
+                  updateEvent={undefined}
+                  restoreEvent={restoreEvent}
+                  isDeletedView={true}
+                />
+              )}
+            </div>
+          ) : (
+            <div className="bg-white p-6 rounded-xl shadow-md">
+              <EventList
+                events={events}
+                currentUserId={Number(session?.user?.id) || 0}
+                deleteEvent={deleteEvent}
+                updateEvent={updateEvent}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

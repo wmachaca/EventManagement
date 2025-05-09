@@ -3,7 +3,7 @@
 
 import { signOut, useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
-import { Avatar} from '@/components/ui/avatar';
+import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,7 +17,7 @@ import { useLocale } from 'next-intl';
 import Link from 'next/link';
 
 export function UserNav() {
-  const { data: session, status } = useSession();  
+  const { data: session, status } = useSession();
   const pathname = usePathname();
   const locale = useLocale();
   const user = session?.user;
@@ -32,10 +32,10 @@ export function UserNav() {
       {/* Welcome Message */}
       <div className="hidden md:block">
         <p className="text-sm sm:text-base">
-          Welcome, 
+          Welcome,
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 font-extrabold text-2xl hover:drop-shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-all duration-300">
-          {user.name}
-                </span>
+            {user.name}
+          </span>
         </p>
       </div>
 
@@ -50,28 +50,26 @@ export function UserNav() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar
-  className="h-8 w-8"
-  src={user.image || '/default-avatar.png'}
-  alt={user.name || 'User'}
-  fallback={
-    user.name
-      ? user.name
-          .split(' ')
-          .map((n) => n[0])
-          .join('')
-      : '?'
-  }
-/>
+            <Avatar
+              className="h-8 w-8"
+              src={user.image || '/default-avatar.png'}
+              alt={user.name || 'User'}
+              fallback={
+                user.name
+                  ? user.name
+                      .split(' ')
+                      .map(n => n[0])
+                      .join('')
+                  : '?'
+              }
+            />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">{user.name}</p>
-              <p className="text-xs leading-none text-muted-foreground">
-                {user.email}
-              </p>
+              <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />

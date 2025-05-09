@@ -7,7 +7,7 @@ export const updateEvent = async (req: Request, res: Response) => {
   try {
     if (!isAuthenticated(req)) {
       return res.status(401).json({ message: 'Unauthorized' });
-    }       
+    }
     const id = parseInt(req.params.id);
     const input: UpdateEventInput = req.body;
 

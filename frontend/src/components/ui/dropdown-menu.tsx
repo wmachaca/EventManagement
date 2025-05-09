@@ -27,7 +27,7 @@ export const DropdownMenuContent = React.forwardRef<
         'data-[side=right]:animate-slideLeftAndFade',
         'data-[side=bottom]:animate-slideUpAndFade',
         'data-[side=left]:animate-slideRightAndFade',
-        className
+        className,
       )}
       {...props}
     />
@@ -51,7 +51,7 @@ export const DropdownMenuItem = React.forwardRef<
       'transition-colors focus:bg-gray-100 focus:text-gray-900',
       inset && 'pl-8',
       disabled && 'pointer-events-none opacity-50',
-      className
+      className,
     )}
     disabled={disabled}
     {...props}
@@ -68,10 +68,7 @@ export const DropdownMenuLabel = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DropdownPrimitive.Label
     ref={ref}
-    className={cn(
-      'px-2 py-1.5 text-sm font-semibold text-gray-900',
-      className
-    )}
+    className={cn('px-2 py-1.5 text-sm font-semibold text-gray-900', className)}
     {...props}
   />
 ));

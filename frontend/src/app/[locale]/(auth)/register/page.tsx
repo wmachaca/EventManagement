@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';//abstracts form state management
+import { useForm } from 'react-hook-form'; //abstracts form state management
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { signIn } from 'next-auth/react';
@@ -11,15 +11,17 @@ import { useLocale } from 'next-intl';
 import Link from 'next/link';
 
 // Enhanced schema with name field and better validation messages
-const schema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string().min(1, 'Please confirm your password'),
-}).refine(data => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ['confirmPassword'],
-});
+const schema = z
+  .object({
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+    email: z.string().email('Please enter a valid email address'),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
 
 type FormData = z.infer<typeof schema>;
 
@@ -29,12 +31,12 @@ export default function RegisterPage() {
   const router = useRouter();
   const [apiError, setApiError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const locale = useLocale(); 
+  const locale = useLocale();
 
-  const { 
-    register, 
-    handleSubmit, 
-    formState: { errors } 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
@@ -49,7 +51,7 @@ export default function RegisterPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept-Language': locale // Add this header          
+          'Accept-Language': locale, // Add this header
         },
         body: JSON.stringify({
           name: data.name,
@@ -88,9 +90,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          {t('title')}
-        </h1>
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">{t('title')}</h1>
 
         {apiError && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -106,14 +106,14 @@ export default function RegisterPage() {
             <input
               id="name"
               type="text"
-              {...register('name')} //similar than useState 
+              {...register('name')} //similar than useState
               className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                errors.name
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'border-gray-300 focus:ring-blue-500'
               }`}
             />
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-            )}
+            {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
           </div>
 
           <div>
@@ -125,12 +125,12 @@ export default function RegisterPage() {
               type="email"
               {...register('email')}
               className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                errors.email
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'border-gray-300 focus:ring-blue-500'
               }`}
             />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-            )}
+            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
           </div>
 
           <div>
@@ -142,7 +142,9 @@ export default function RegisterPage() {
               type="password"
               {...register('password')}
               className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.password ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                errors.password
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'border-gray-300 focus:ring-blue-500'
               }`}
             />
             {errors.password && (
@@ -159,7 +161,9 @@ export default function RegisterPage() {
               type="password"
               {...register('confirmPassword')}
               className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.confirmPassword ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                errors.confirmPassword
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'border-gray-300 focus:ring-blue-500'
               }`}
             />
             {errors.confirmPassword && (
@@ -179,10 +183,7 @@ export default function RegisterPage() {
         <div className="mt-6 text-center">
           <p className="text-gray-600">
             {t('alreadyHaveAccount')}{' '}
-            <Link 
-              href={`/${locale}/login`} 
-              className="text-blue-600 hover:underline"
-            >
+            <Link href={`/${locale}/login`} className="text-blue-600 hover:underline">
               {t('loginHere')}
             </Link>
           </p>
