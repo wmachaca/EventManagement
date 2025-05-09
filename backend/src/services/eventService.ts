@@ -19,12 +19,12 @@ export const createEvent = async (input: CreateEventInput) => {
       isVirtual: input.isVirtual,
       status: input.status || 'DRAFT', // Default to DRAFT if not provided
       creator: {
-        connect: { id: input.creatorId } // Properly connect the creator
-      }
+        connect: { id: input.creatorId }, // Properly connect the creator
+      },
     },
     include: {
-      creator: true // Include creator in the response
-    }
+      creator: true, // Include creator in the response
+    },
   });
 };
 
@@ -37,7 +37,7 @@ export const updateEvent = async (id: number, input: UpdateEventInput) => {
 
 export const getEventById = async (id: number, includeDeleted = false) => {
   return prisma.event.findUnique({
-    where: { 
+    where: {
       id,
       isDeleted: includeDeleted ? undefined : false,
     },
@@ -55,7 +55,7 @@ export const getEventById = async (id: number, includeDeleted = false) => {
 export const listEvents = async (filter: {
   status?: 'DRAFT' | 'PUBLISHED' | 'CANCELED';
   creatorId?: number;
-  includeDeleted?: boolean; // New option  
+  includeDeleted?: boolean; // New option
 }) => {
   return prisma.event.findMany({
     where: {
@@ -67,7 +67,7 @@ export const listEvents = async (filter: {
     },
     orderBy: {
       createdAt: 'desc',
-    },    
+    },
   });
 };
 
@@ -123,10 +123,7 @@ export const applyToEvent = async (eventId: number, userId: number) => {
   });
 };
 
-export const updateApplicationStatus = async (
-  applicationId: number,
-  status: ApplicationStatus
-) => {
+export const updateApplicationStatus = async (applicationId: number, status: ApplicationStatus) => {
   return prisma.eventApplication.update({
     where: { id: applicationId },
     data: { status },

@@ -7,11 +7,7 @@ import { UserPayload } from '../../types/userPayload';
 const JWT_SECRET = process.env.JWT_SECRET!;
 if (!JWT_SECRET) throw new Error('JWT_SECRET is not defined');
 
-export const authMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // 1. Get token from Authorization header
     const authHeader = req.headers.authorization;
@@ -37,7 +33,7 @@ export const authMiddleware = async (
     req.user = {
       userId: user.id,
       email: user.email ?? undefined,
-      name: user.name ?? undefined,      
+      name: user.name ?? undefined,
     };
 
     next();

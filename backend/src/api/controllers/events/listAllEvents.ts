@@ -5,7 +5,7 @@ import * as eventService from '../../../services/eventService';
 export const listAllEvents = async (req: Request, res: Response) => {
   try {
     const filter = {
-      status: req.query.status as 'DRAFT' | 'PUBLISHED' | 'CANCELED'
+      status: req.query.status as 'DRAFT' | 'PUBLISHED' | 'CANCELED',
     };
 
     const events = await eventService.listEvents(filter);

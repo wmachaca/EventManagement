@@ -5,7 +5,8 @@
   "main": "src/server.ts",
   "scripts": {
     "start": "tsc && node dist/server.js",
-    "dev": "nodemon --watch src --ext ts,json --exec ts-node src/server.ts",    "test": "cross-env NODE_ENV=test dotenv -e .env.test jest",
+    "dev": "nodemon --watch src --ext ts,json --exec ts-node src/server.ts",
+    "test": "cross-env NODE_ENV=test dotenv -e .env.test jest",
     "prisma:generate": "prisma generate",
     "postinstall": "npm run prisma:generate"
   },
@@ -37,8 +38,6 @@
     "@types/passport": "^1.0.15",
     "@types/passport-google-oauth20": "^2.0.9",
     "@types/supertest": "^2.0.16",
-    "@typescript-eslint/eslint-plugin": "^7.1.1",
-    "@typescript-eslint/parser": "^7.1.1",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
     "dotenv-cli": "^8.0.0",

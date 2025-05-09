@@ -4,14 +4,13 @@ import * as eventService from '../../../services/eventService';
 import { UpdateApplicationStatusInput } from '../../../models/event';
 import { isAuthenticated } from '../../../types/authenticatedRequest';
 
-
 const prisma = new PrismaClient();
 
 export const updateApplicationStatus = async (req: Request, res: Response) => {
   try {
     if (!isAuthenticated(req)) {
       return res.status(401).json({ message: 'Unauthorized' });
-    }        
+    }
     const input: UpdateApplicationStatusInput = {
       applicationId: parseInt(req.params.applicationId),
       status: req.body.status,
@@ -28,7 +27,7 @@ export const updateApplicationStatus = async (req: Request, res: Response) => {
 
     const updatedApplication = await eventService.updateApplicationStatus(
       input.applicationId,
-      input.status
+      input.status,
     );
     res.json(updatedApplication);
   } catch (error) {

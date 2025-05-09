@@ -17,27 +17,27 @@ if (!JWT_SECRET) {
 
 // Zod validation schema (modern alternative to Joi)
 const registerSchema = z.object({
-  name: z.string()
-    .min(2, "Name must be at least 2 characters")
-    .max(50, "Name cannot exceed 50 characters")
-    .regex(/^[a-zA-Z\s'-]+$/, "Name contains invalid characters"),
-  email: z.string()
-    .email("Invalid email format")
-    .max(100, "Email cannot exceed 100 characters"),
-  password: z.string()
-    .min(6, "Password must be at least 8 characters")
-    .max(20, "Password cannot exceed 100 characters")
-   // .regex(/[A-Z]/, "Must contain at least one uppercase letter")
-   // .regex(/[a-z]/, "Must contain at least one lowercase letter")
-   // .regex(/[0-9]/, "Must contain at least one number")
+  name: z
+    .string()
+    .min(2, 'Name must be at least 2 characters')
+    .max(50, 'Name cannot exceed 50 characters')
+    .regex(/^[a-zA-Z\s'-]+$/, 'Name contains invalid characters'),
+  email: z.string().email('Invalid email format').max(100, 'Email cannot exceed 100 characters'),
+  password: z
+    .string()
+    .min(6, 'Password must be at least 8 characters')
+    .max(20, 'Password cannot exceed 100 characters'),
+  // .regex(/[A-Z]/, "Must contain at least one uppercase letter")
+  // .regex(/[a-z]/, "Must contain at least one lowercase letter")
+  // .regex(/[0-9]/, "Must contain at least one number")
 });
 
 export const registerUser = async (req: Request<{}, {}, RegisterBody>, res: Response) => {
   const validation = registerSchema.safeParse(req.body);
   if (!validation.success) {
-    return res.status(400).json({ 
+    return res.status(400).json({
       message: 'Validation failed',
-      errors: validation.error.errors 
+      errors: validation.error.errors,
     });
   }
 
@@ -78,7 +78,7 @@ export const registerUser = async (req: Request<{}, {}, RegisterBody>, res: Resp
         iat: Math.floor(Date.now() / 1000),
         exp: Math.floor(Date.now() / 1000) + 3600,
       },
-      JWT_SECRET
+      JWT_SECRET,
     );
 
     res.status(201).json({
@@ -86,9 +86,9 @@ export const registerUser = async (req: Request<{}, {}, RegisterBody>, res: Resp
       data: {
         token,
         user,
-        expiresIn: 3600 // Helpful for frontend
+        expiresIn: 3600, // Helpful for frontend
       },
-      message: "Registration successful"
+      message: 'Registration successful',
     });
   } catch (error) {
     console.error('Registration Error:', error);

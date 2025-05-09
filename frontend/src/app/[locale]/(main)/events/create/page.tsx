@@ -33,7 +33,7 @@ export default function CreateEventPage() {
           headers: {
             Authorization: `Bearer ${session?.accessToken}`,
           },
-        }
+        },
       );
 
       console.log('Event created with ID:', response.data.id);
@@ -44,7 +44,7 @@ export default function CreateEventPage() {
       console.error(err);
       setError(t('createError') || 'Failed to create event.');
     }
-  };  
+  };
 
   if (status === 'loading') {
     return (
@@ -53,7 +53,6 @@ export default function CreateEventPage() {
       </div>
     );
   }
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-100 to-blue-200 p-4 md:p-8">
@@ -66,7 +65,7 @@ export default function CreateEventPage() {
           </div>
         )}
 
-<AddEvent addEvent={addEvent} />
+        <AddEvent addEvent={addEvent} />
       </div>
     </div>
   );

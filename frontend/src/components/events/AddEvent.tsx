@@ -20,7 +20,7 @@ export default function AddEvent({ addEvent }: AddEventProps) {
     e.preventDefault();
     if (!formData.name.trim()) return;
     addEvent(formData);
-    
+
     // Reset form
     setFormData({
       name: '',
@@ -33,10 +33,12 @@ export default function AddEvent({ addEvent }: AddEventProps) {
     });
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;//put name inside input
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
+    const { name, value, type } = e.target; //put name inside input
     const checked = (e.target as HTMLInputElement).checked;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
@@ -52,7 +54,7 @@ export default function AddEvent({ addEvent }: AddEventProps) {
         <input
           type="text"
           id="name"
-          name="name" 
+          name="name"
           value={formData.name}
           onChange={handleChange}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -66,7 +68,7 @@ export default function AddEvent({ addEvent }: AddEventProps) {
         </label>
         <textarea
           id="description"
-          name="description" 
+          name="description"
           value={formData.description}
           onChange={handleChange}
           rows={3}
@@ -78,7 +80,7 @@ export default function AddEvent({ addEvent }: AddEventProps) {
         <input
           type="checkbox"
           id="isVirtual"
-          name="isVirtual" 
+          name="isVirtual"
           checked={formData.isVirtual}
           onChange={handleChange}
           className="mr-2"
@@ -96,7 +98,7 @@ export default function AddEvent({ addEvent }: AddEventProps) {
           <input
             type="text"
             id="location"
-            name="location" 
+            name="location"
             value={formData.location}
             onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -112,7 +114,7 @@ export default function AddEvent({ addEvent }: AddEventProps) {
         <input
           type="datetime-local"
           id="schedule"
-          name="schedule" 
+          name="schedule"
           value={formData.schedule}
           onChange={handleChange}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -127,7 +129,7 @@ export default function AddEvent({ addEvent }: AddEventProps) {
         <input
           type="number"
           id="capacity"
-          name="capacity" 
+          name="capacity"
           min="1"
           value={formData.capacity}
           onChange={handleChange}
@@ -141,7 +143,7 @@ export default function AddEvent({ addEvent }: AddEventProps) {
         </label>
         <select
           id="status"
-          name="status" 
+          name="status"
           value={formData.status}
           onChange={handleChange}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

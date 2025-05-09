@@ -19,7 +19,7 @@ export const PUBLIC_USER_FIELDS = {
  */
 export function sanitizeUser(user: User | null): Omit<User, 'authId'> | null {
   if (!user) return null;
-  
+
   // Create a new object without auth-related fields
   const { authId, ...safeUser } = user;
   return safeUser;

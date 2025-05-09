@@ -7,7 +7,7 @@ export const applyToEvent = async (req: Request, res: Response) => {
   try {
     if (!isAuthenticated(req)) {
       return res.status(401).json({ message: 'Unauthorized' });
-    }    
+    }
     const input: EventApplicationInput = {
       eventId: parseInt(req.params.eventId),
       userId: req.user.userId,

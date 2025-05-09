@@ -19,7 +19,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const t = useTranslations('Auth');
-  const locale = useLocale(); 
+  const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState('');
@@ -36,7 +36,7 @@ export default function LoginPage() {
   });
 
   // Handle Google callback with token
- useEffect(() => {
+  useEffect(() => {
     const token = searchParams.get('token');
     if (token) {
       handleGoogleCallback(token);
@@ -50,7 +50,7 @@ export default function LoginPage() {
         token,
         redirect: false,
       });
-      
+
       if (result?.error) {
         throw new Error(result.error);
       }
@@ -72,26 +72,25 @@ export default function LoginPage() {
       setLoading(true);
       setError('');
 
-    // Directly call your backend for debugging
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    const resultbef = await res.json();
-    console.log('Raw backend response:', resultbef); // Add this line
+      // Directly call your backend for debugging
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const resultbef = await res.json();
+      console.log('Raw backend response:', resultbef); // Add this line
 
       const result = await signIn('credentials', {
         redirect: false,
         email: data.email,
         password: data.password,
       });
-      console.log('NextAuth result:', result);// I think it is only for debug
-
+      console.log('NextAuth result:', result); // I think it is only for debug
 
       if (result?.error) {
         setAttempts(prev => prev + 1);
-        
+
         if (result.error === 'CredentialsSignin') {
           setError(t('login.invalidCredentials', { attemptsLeft: 3 - attempts }));
         } else {
@@ -101,7 +100,7 @@ export default function LoginPage() {
         router.push(`/${locale}/events`);
       }
     } catch (err) {
-      console.error(err); // or use a logger if available      
+      console.error(err); // or use a logger if available
       setError(t('login.loginFailed'));
       setAttempts(prev => prev + 1);
     } finally {
@@ -117,9 +116,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          {t('login.title')}
-        </h1>
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">{t('login.title')}</h1>
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -142,9 +139,7 @@ export default function LoginPage() {
                   : 'border-gray-300 focus:ring-blue-500'
               }`}
             />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-            )}
+            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
           </div>
 
           <div>
@@ -187,11 +182,7 @@ export default function LoginPage() {
             disabled={googleLoading}
             className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 px-4 rounded-md transition-colors disabled:opacity-70"
           >
-            <img 
-              src="https://www.google.com/favicon.ico" 
-              alt="Google logo" 
-              className="w-5 h-5" 
-            />
+            <img src="https://www.google.com/favicon.ico" alt="Google logo" className="w-5 h-5" />
             {googleLoading ? t('login.googleLoading') : t('login.google')}
           </button>
         </div>
@@ -199,10 +190,7 @@ export default function LoginPage() {
         <div className="mt-6 text-center">
           <p className="text-gray-600">
             {t('login.noAccount')}{' '}
-            <Link 
-              href={`/${locale}/register`} 
-              className="text-blue-600 hover:underline"
-            >
+            <Link href={`/${locale}/register`} className="text-blue-600 hover:underline">
               {t('login.register')}
             </Link>
           </p>

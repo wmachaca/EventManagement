@@ -46,7 +46,7 @@ export default function EventTable({
         </tr>
       </thead>
       <tbody className="bg-white divide-y divide-gray-200">
-        {events.map((event) => (
+        {events.map(event => (
           <EventRow
             key={event.id}
             event={event}
