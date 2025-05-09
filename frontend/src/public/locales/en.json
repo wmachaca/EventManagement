@@ -2,8 +2,11 @@
   "Home": {
     "title": "Event Manager Pro",
     "description": "The ultimate solution for organizing and managing your events",
-    "login": "Sign In",
-    "register": "Sign Up"
+    "getStarted": "Get Started",
+    "getStartedSubtitle": "Click here to begin managing your events",
+    "loginPrompt": "Please log in to manage your events",
+    "login": "Login",
+    "register": "Register"
   },
   "Metadata": {
     "title": "Event Manager",
@@ -11,23 +14,43 @@
   },
   "Auth": {
     "login": {
-      "title": "Welcome back",
+      "title": "Login",
       "email": "Email",
       "password": "Password",
-      "submit": "Sign In",
+      "submit": "Login",
+      "loading": "Logging in...",
+      "google": "Continue with Google",
+      "googleLoading": "Redirecting to Google...",
+      "or": "or",
       "noAccount": "Don't have an account?",
       "alreadyHaveAccount": "Already have an account?",
-      "loginLink": "Login here"
+      "loginLink": "Login here",
+      "register": "Register here",
+      "invalidCredentials": "Invalid credentials. {attemptsLeft} attempts remaining.",
+      "attemptsExceeded": "Maximum attempts reached. Please try again later.",
+      "loginFailed": "Login failed. Please try again."
     },
     "register": {
       "title": "Create an Account",
-      "email": "Email",
+      "name": "Name",
+      "email": "Email Address",
       "password": "Password",
       "confirmPassword": "Confirm Password",
-      "submit": "Sign Up",
-      "submitting": "Signing up...",
+      "submit": "Register",
+      "submitting": "Creating account...",
       "alreadyHaveAccount": "Already have an account?",
-      "loginLink": "Log in"
+      "loginHere": "Login here",
+      "loginLink": "Login here"
     }
+  },
+  "Events": {
+    "myEvents": "My Events",
+    "createTitle": "Create New Event",
+    "allEvents": "All Events",
+    "viewDeletedEvents": "See deleted events",
+    "deletedEvents": "Deleted events",
+    "fetchError": "Failed to fetch your events",
+    "deleteError": "Failed to delete event",
+    "backToActiveEvents": "Back Active Events"
   }
 }

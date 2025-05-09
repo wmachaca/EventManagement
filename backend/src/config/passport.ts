@@ -1,6 +1,6 @@
 // src/config/passport.ts
 import passport from 'passport';
-import { Strategy as GoogleStrategy} from 'passport-google-oauth20';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { prisma } from '../database/client';
 import dotenv from 'dotenv';
 import type { Request } from 'express';
@@ -41,13 +41,7 @@ const googleStrategy = new GoogleStrategy(
     callbackURL: '/api/auth/google/callback',
     passReqToCallback: true,
   },
-  async (
-    req: Request,
-    accessToken: string,
-    refreshToken: string,
-    profile: any,
-    done: any
-  ) => {
+  async (req: Request, accessToken: string, refreshToken: string, profile: any, done: any) => {
     try {
       console.log('Authenticating Google user:', profile.emails[0].value);
 
@@ -70,8 +64,8 @@ const googleStrategy = new GoogleStrategy(
           },
         });
       } else if (user.provider === 'credentials') {
-        return done(null, false, { 
-          message: 'This email is already registered with email/password' 
+        return done(null, false, {
+          message: 'This email is already registered with email/password',
         });
       } else if (!user.googleId) {
         user = await prisma.user.update({
@@ -85,7 +79,7 @@ const googleStrategy = new GoogleStrategy(
       console.error('Google auth error:', error);
       return done(error instanceof Error ? error : new Error('Authentication failed'));
     }
-  }
+  },
 );
 
 // Apply proxy if configured

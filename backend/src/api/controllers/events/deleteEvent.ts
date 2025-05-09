@@ -9,11 +9,11 @@ export const deleteEvent = async (req: Request, res: Response) => {
     }
 
     const eventId = parseInt(req.params.id);
-    const deletedEvent = await eventService.deleteEvent(eventId, req.user.id);
+    const deletedEvent = await eventService.deleteEvent(eventId, req.user.userId);
 
     if (!deletedEvent) {
-      return res.status(404).json({ 
-        message: 'Event not found or you are not the creator' 
+      return res.status(404).json({
+        message: 'Event not found or you are not the creator',
       });
     }
 
@@ -27,8 +27,8 @@ export const deleteEvent = async (req: Request, res: Response) => {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    
-    res.status(500).json({ 
+
+    res.status(500).json({
       success: false,
       message: 'Failed to delete event',
       error: errorMessage,

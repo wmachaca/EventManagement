@@ -38,15 +38,15 @@ export const loginUser = async (req: Request<{}, {}, LoginBody>, res: Response) 
         iat: Math.floor(Date.now() / 1000),
         exp: Math.floor(Date.now() / 1000) + 3600,
       },
-      JWT_SECRET
+      JWT_SECRET,
     );
 
     res.json({ token, user: sanitizeUser(user) });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: 'Server error',
-      error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
+      error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
     });
   }
 };

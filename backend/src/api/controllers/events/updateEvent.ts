@@ -7,12 +7,12 @@ export const updateEvent = async (req: Request, res: Response) => {
   try {
     if (!isAuthenticated(req)) {
       return res.status(401).json({ message: 'Unauthorized' });
-    }       
+    }
     const id = parseInt(req.params.id);
     const input: UpdateEventInput = req.body;
 
     const event = await eventService.getEventById(id);
-    if (!event || event.creatorId !== req.user.id) {
+    if (!event || event.creatorId !== req.user.userId) {
       return res.status(403).json({ message: 'Unauthorized' });
     }
 
