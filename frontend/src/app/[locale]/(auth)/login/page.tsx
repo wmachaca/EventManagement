@@ -72,43 +72,14 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
+    console.log('Triggering Google login with locale outside try:', locale);
     try {
       setGoogleLoading(true);
       setError('');
-
-      // First authenticate with NextAuth
-      const result = await signIn('google', { 
-        redirect: false,
-        callbackUrl: `/${locale}/events`
-      });
-
-      if (result?.error) {
-        throw new Error(result.error);
-      }
-
-      // Get the Google ID token from the session
-      const sessionResponse = await fetch('/api/auth/session');
-      const session = await sessionResponse.json();
-
-      if (!session?.idToken) {
-        throw new Error('Google authentication failed - no ID token received');
-      }
-
-      // Send the ID token to your backend
-      const backendResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken: session.idToken }),
-      });
-
-      if (!backendResponse.ok) {
-        const errorData = await backendResponse.json();
-        throw new Error(errorData.message || 'Failed to authenticate with backend');
-      }
-
-      // Redirect will happen automatically via NextAuth
+      console.log('Triggering Google login with locale inside try:', locale);
+      await signIn('google', { callbackUrl: `/${locale}/events` });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Google authentication failed');
+      setError(t('login.googleFailed'));
       setGoogleLoading(false);
     }
   };
