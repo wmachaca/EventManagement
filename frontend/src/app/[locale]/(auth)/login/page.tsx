@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState} from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -21,7 +21,6 @@ export default function LoginPage() {
   const t = useTranslations('Auth');
   const locale = useLocale();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -35,33 +34,6 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
-  // Handle Google callback with token
-  useEffect(() => {
-    const token = searchParams.get('token');
-    if (token) {
-      handleGoogleCallback(token);
-    }
-  }, [searchParams]);
-
-  const handleGoogleCallback = async (token: string) => {
-    try {
-      setGoogleLoading(true);
-      const result = await signIn('google', {
-        token,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        throw new Error(result.error);
-      }
-      router.push(`/${locale}/events`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Google authentication failed');
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
-
   const onSubmit = async (data: LoginFormData) => {
     if (attempts >= 3) {
       setError(t('login.attemptsExceeded'));
@@ -71,15 +43,6 @@ export default function LoginPage() {
     try {
       setLoading(true);
       setError('');
-
-      // Directly call your backend for debugging
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      const resultbef = await res.json();
-      console.log('Raw backend response:', resultbef); // Add this line
 
       const result = await signIn('credentials', {
         redirect: false,
@@ -108,9 +71,46 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    setGoogleLoading(true);
-    signIn('google', { callbackUrl: '/events' });
+  const handleGoogleLogin = async () => {
+    try {
+      setGoogleLoading(true);
+      setError('');
+
+      // First authenticate with NextAuth
+      const result = await signIn('google', { 
+        redirect: false,
+        callbackUrl: `/${locale}/events`
+      });
+
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
+      // Get the Google ID token from the session
+      const sessionResponse = await fetch('/api/auth/session');
+      const session = await sessionResponse.json();
+
+      if (!session?.idToken) {
+        throw new Error('Google authentication failed - no ID token received');
+      }
+
+      // Send the ID token to your backend
+      const backendResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: session.idToken }),
+      });
+
+      if (!backendResponse.ok) {
+        const errorData = await backendResponse.json();
+        throw new Error(errorData.message || 'Failed to authenticate with backend');
+      }
+
+      // Redirect will happen automatically via NextAuth
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Google authentication failed');
+      setGoogleLoading(false);
+    }
   };
 
   return (

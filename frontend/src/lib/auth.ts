@@ -56,13 +56,15 @@ export const authOptions: NextAuthOptions = {
         token.accessToken = user.token;
         token.name = user.name;
       }
-      if (account?.provider === 'google' && account?.access_token) {
-        // You might want to handle Google tokens differently
-      }
+if (account?.provider === 'google') {
+  token.accessToken = account.access_token;
+  token.id = account.providerAccountId;
+  token.provider = 'google';
+}
       return token;
     },
     async session({ session, token }) {
-      session.user.id = token.userId ?? '';
+      session.user.id = token.userId || token.id || '';
       session.user.name = token.name ?? '';
       session.accessToken = token.accessToken ?? '';
       return session;
