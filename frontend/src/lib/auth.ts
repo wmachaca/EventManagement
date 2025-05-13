@@ -3,57 +3,14 @@ import NextAuth, { type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import axios, { AxiosError } from 'axios';
-import { HttpsProxyAgent } from 'https-proxy-agent'; // Import the proxy agent
 
-// Determine if there is a proxy set in the environment variables
-const proxyUrl = process.env.HTTPS_PROXY;
-
-let agent: any = null;
-if (proxyUrl) {
-  try {
-    // Create proxy agent with proper typing
-    agent = new HttpsProxyAgent({
-      host: 'proxy.cnea.gob.ar',
-      port: 1280,
-      protocol: 'http:',
-      timeout: 5000,
-      keepAlive: true,
-      maxSockets: 50,
-      rejectUnauthorized: false
-    });
-
-    // Add required methods with proper typing
-    agent.getName = () => 'HttpsProxyAgent';
-    
-    // Properly typed addRequest implementation
-    agent.addRequest = function(req: any, options: any) {
-      req.on('socket', (socket: any) => {
-        socket.setTimeout(options.timeout || 5000);
-      });
-    };
-
-    console.log('Proxy agent configured successfully');
-  } catch (err) {
-    console.error('Proxy configuration failed:', err);
-    throw new Error('Proxy setup failed');
-  }
+// Environment validation
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+  throw new Error('Missing Google OAuth environment variables');
 }
-
-//console.log(process.env.GOOGLE_CLIENT_ID);
-
-// Add this right before the GoogleProvider configuration
-/*console.log('Google Provider Config:', {
-  clientId: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: !!process.env.GOOGLE_CLIENT_SECRET, // Logs "true" if exists (without exposing secret)
-  proxy: !!agent, // Shows if proxy is enabled
-  NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-  authorizationParams: {
-    prompt: 'consent',
-    access_type: 'offline',
-    response_type: 'code',
-    scope: 'openid email profile',
-  },
-});*/
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error('Missing NEXTAUTH_SECRET');
+}
 
 // Google Provider Configuration
 const googleProviderConfig = {
@@ -67,11 +24,6 @@ const googleProviderConfig = {
       scope: 'openid email profile',
     },
   },
-  /*
-  httpOptions: agent ? { 
-    agent: agent,
-    timeout: 5000
-  } : undefined*/
 };
 
 export const authOptions: NextAuthOptions = {
@@ -83,13 +35,15 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Email and password are required');
+        }
+
         try {
           const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
-            email: credentials?.email,
-            password: credentials?.password,
+            email: credentials.email,
+            password: credentials.password,
           });
-
-          console.log('Login response from backend:', res.data);
 
           if (res.data.token) {
             return {
@@ -113,16 +67,12 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async signIn({ user, account, profile }) {
-      if (account?.provider === 'google') {
-        console.log('Sending tokens to backend:', {
-          accessToken: account.access_token,
-          idToken: account.id_token,
-          endpoint: `${process.env.NEXT_PUBLIC_API_URL}/auth/google`,
-        });        
+      // Handle Google provider specifically
+      if (account?.provider === 'google') {        
         try {
           // Send the Google access token and ID token to your backend
           const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/auth/google`,
+            `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`,
             {
               accessToken: account.access_token,
               idToken: account.id_token,
@@ -130,50 +80,69 @@ export const authOptions: NextAuthOptions = {
           );
 
           // If successful, attach the backend JWT token and user info
-          if (response.data.token) {
-            user.token = response.data.token;
-            user.id = response.data.userId;
-          } else {
-            console.error('Google login failed');
-            return false; // Reject the sign-in if backend fails
+          if (!response.data?.token) {
+            console.error('Google login failed - no token returned');
+            return false;
           }
+
+          // Attach backend token to user object
+          user.token = response.data.token;
+          user.id = response.data.userId;
+          
+          return true;
         } catch (error) {
           console.error('Google auth backend error:', error);
           return false; // Reject sign-in if there's an issue with the backend
         }
       }
-      console.log('Google account data:', account);
-      console.log('Google profile data:', profile);      
+
+      // For credentials provider, just continue
       return true; // Proceed with sign-in if successful
     },
 
     async jwt({ token, user, account }) {
+      // Initial sign in
       if (user) {
         // On first login, attach user info to the token
-        token.userId = user.id;
-        token.accessToken = user.token;
-        token.name = user.name;
+    // Type assertion since we've declared User.id as number
+    const typedUser = user as { id: number; token?: string; name?: string };
+    
+    token.userId = typedUser.id; // Now definitely a number
+    token.accessToken = typedUser.token;
+    token.name = typedUser.name;
       }
+
+      // For Google provider, store provider info
       if (account?.provider === 'google') {
         // Store Google account information in the token
         token.provider = account.provider;
       }
-      console.log('JWT account:', account);      
       return token;
     },
 
     async session({ session, token }) {
-      // Attach JWT token info to the session object
-      console.log('Session object:', session);      
-      session.user.name = token.name ?? '';
-      session.accessToken = token.accessToken as string;
+      // Send properties to the client
+  if (token.userId) {
+    session.user.id = token.userId; // No need to cast - types match
+  }
+  if (token.name) {
+    session.user.name = token.name;
+  }
+  if (token.accessToken) {
+    session.accessToken = token.accessToken;
+  }
       return session;
     },
   },
-  debug: true, // Enable verbose logging for debugging
+  // Session configuration
+  session: {
+    strategy: 'jwt', // Recommended for better security
+    maxAge: 1 * 24 * 60 * 60, // 1 days
+  },  
+  debug: process.env.NODE_ENV === 'development',
   logger: {
     error(code, metadata) {
-      console.error('[OAuth Error]', code, JSON.stringify(metadata, null, 2));
+      console.error('[OAuth Error]', code, metadata);
     },
     warn(code) {
       console.warn('[OAuth Warning]', code);
