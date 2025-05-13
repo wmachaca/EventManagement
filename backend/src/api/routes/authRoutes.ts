@@ -1,7 +1,6 @@
 // src/api/routes/authRoutes.ts
 import express from 'express';
-import passport from '../../config/passport';
-import { registerUser, loginUser, googleAuth } from '../controllers/auth/index';
+import { registerUser, loginUser, googleLogin } from '../controllers/auth/index';
 
 const router = express.Router();
 
@@ -10,21 +9,7 @@ router.post('/register', registerUser);
 router.post('/login', loginUser);
 
 // Google OAuth
-router.get(
-  '/google',
-  passport.authenticate('google', {
-    scope: ['profile', 'email'],
-    session: false,
-  }),
-);
-
-router.get(
-  '/google/callback',
-  passport.authenticate('google', {
-    failureRedirect: '/login',
-    session: false,
-  }),
-  googleAuth,
-);
+//manage in frontend using nextjs
+router.post('/google', googleLogin);
 
 export default router;
