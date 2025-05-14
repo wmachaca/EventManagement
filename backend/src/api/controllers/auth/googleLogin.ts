@@ -42,12 +42,11 @@ export const googleLogin = async (req: Request, res: Response) => {
       user = await prisma.user.create({
         data: {
           email,
-      name: name || email.split('@')[0], // Fallback to email prefix if name is undefined
-      provider: 'google', // This goes in User model
-      googleId, // This goes in User model      
+          name: name || email.split('@')[0], // Fallback to email prefix if name is undefined
+          provider: 'google', // This goes in User model
+          googleId, // This goes in User model
           auth: {
-            create: {
-            },
+            create: {},
           },
         },
         include: { auth: true },

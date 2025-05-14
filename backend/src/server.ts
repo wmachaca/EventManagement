@@ -1,4 +1,5 @@
-import express, { Application, Request, Response, NextFunction } from 'express';
+import express from 'express';
+import type { Application, Request, Response, NextFunction } from 'express';
 import passport from './config/passport';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -7,6 +8,7 @@ import eventRoutes from './api/routes/eventRoutes';
 import authRoutes from './api/routes/authRoutes';
 import { filterAuthData } from './api/middleware/security';
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config(); // Load environment variables
 
@@ -25,6 +27,9 @@ app.use(cors(corsOptions));
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(filterAuthData());
+
+// Serve images statically
+app.use('/images', express.static(path.join(__dirname, '../public/images')));
 
 // Routes
 app.use('/api/auth', authRoutes);

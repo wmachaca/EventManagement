@@ -68,16 +68,13 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       // Handle Google provider specifically
-      if (account?.provider === 'google') {        
+      if (account?.provider === 'google') {
         try {
           // Send the Google access token and ID token to your backend
-          const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`,
-            {
-              accessToken: account.access_token,
-              idToken: account.id_token,
-            }
-          );
+          const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`, {
+            accessToken: account.access_token,
+            idToken: account.id_token,
+          });
 
           // If successful, attach the backend JWT token and user info
           if (!response.data?.token) {
@@ -88,7 +85,7 @@ export const authOptions: NextAuthOptions = {
           // Attach backend token to user object
           user.token = response.data.token;
           user.id = response.data.userId;
-          
+
           return true;
         } catch (error) {
           console.error('Google auth backend error:', error);
@@ -104,12 +101,12 @@ export const authOptions: NextAuthOptions = {
       // Initial sign in
       if (user) {
         // On first login, attach user info to the token
-    // Type assertion since we've declared User.id as number
-    const typedUser = user as { id: number; token?: string; name?: string };
-    
-    token.userId = typedUser.id; // Now definitely a number
-    token.accessToken = typedUser.token;
-    token.name = typedUser.name;
+        // Type assertion since we've declared User.id as number
+        const typedUser = user as { id: number; token?: string; name?: string };
+
+        token.userId = typedUser.id; // Now definitely a number
+        token.accessToken = typedUser.token;
+        token.name = typedUser.name;
       }
 
       // For Google provider, store provider info
@@ -122,15 +119,15 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       // Send properties to the client
-  if (token.userId) {
-    session.user.id = token.userId; // No need to cast - types match
-  }
-  if (token.name) {
-    session.user.name = token.name;
-  }
-  if (token.accessToken) {
-    session.accessToken = token.accessToken;
-  }
+      if (token.userId) {
+        session.user.id = token.userId; // No need to cast - types match
+      }
+      if (token.name) {
+        session.user.name = token.name;
+      }
+      if (token.accessToken) {
+        session.accessToken = token.accessToken;
+      }
       return session;
     },
   },
@@ -138,7 +135,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt', // Recommended for better security
     maxAge: 1 * 24 * 60 * 60, // 1 days
-  },  
+  },
   debug: process.env.NODE_ENV === 'development',
   logger: {
     error(code, metadata) {
@@ -149,7 +146,7 @@ export const authOptions: NextAuthOptions = {
     },
     debug(code, metadata) {
       console.log('[OAuth Debug]', code, metadata);
-    }
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

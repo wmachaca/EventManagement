@@ -5,10 +5,14 @@ export interface CreateEventInput {
   name: string;
   description?: string;
   location?: string;
-  status?: EventStatus;
-  schedule: Date;
+  startDate: Date;
+  endDate?: Date;
   capacity: number;
   isVirtual: boolean;
+  virtualLink?: string;
+  imageUrl?: string;
+  contactEmail?: string;
+  status?: EventStatus;
   creatorId: number;
 }
 
@@ -16,9 +20,13 @@ export interface UpdateEventInput {
   name?: string;
   description?: string;
   location?: string;
-  schedule?: Date;
+  startDate?: Date;
+  endDate?: Date;
   capacity?: number;
   isVirtual?: boolean;
+  virtualLink?: string;
+  imageUrl?: string;
+  contactEmail?: string;
   status?: EventStatus;
 }
 

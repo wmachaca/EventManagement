@@ -12,14 +12,14 @@ const options = {
   agent: agent,
 };
 
-const req = https.request(options, (res) => {
+const req = https.request(options, res => {
   console.log(`Status: ${res.statusCode}`);
-  res.on('data', (chunk) => {
+  res.on('data', chunk => {
     console.log(`BODY: ${chunk}`);
   });
 });
 
-req.on('error', (e) => {
+req.on('error', e => {
   console.error(`Request error: ${e.message}`);
 });
 

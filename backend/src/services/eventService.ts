@@ -14,7 +14,8 @@ export const createEvent = async (input: CreateEventInput) => {
       name: input.name,
       description: input.description,
       location: input.location,
-      schedule: new Date(input.schedule), // Convert to Date object
+      startDate: new Date(input.startDate), // 🔁 updated from schedule
+      endDate: input.endDate ? new Date(input.endDate) : undefined,
       capacity: input.capacity,
       isVirtual: input.isVirtual,
       status: input.status || 'DRAFT', // Default to DRAFT if not provided
