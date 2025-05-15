@@ -35,13 +35,18 @@ model Event {
   id           Int                @id @default(autoincrement())
   name         String
   description  String?
+  imageUrl     String?       
   location     String?
-  schedule     DateTime
+  startDate    DateTime           
+  endDate      DateTime?          // Optional end date for multi-day events
   capacity     Int
+  virtualLink  String?            // For virtual events (Zoom/Teams link)  
   isVirtual    Boolean            @default(false)
   creatorId    Int
   creator      User               @relation("CreatedEvents", fields: [creatorId], references: [id])
   attendees    User[]             @relation("EventAttendees")
+  sponsors     Sponsor[]          @relation("EventSponsors") 
+  contactEmail String?              
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
   version      Int                @default(1) // For optimistic concurrency control
@@ -51,6 +56,14 @@ model Event {
   deletedAt    DateTime? // Timestamp for soft delete
 
   @@unique([id, creatorId], name: "id_creatorId") // Compound key (optional but recommended for some queries)
+}
+
+model Sponsor {
+  id          Int     @id @default(autoincrement())
+  name        String
+  logoUrl     String?
+  website     String?
+  events      Event[] @relation("EventSponsors")
 }
 
 enum EventStatus {

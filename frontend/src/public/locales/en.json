@@ -51,6 +51,8 @@
     "deletedEvents": "Deleted events",
     "fetchError": "Failed to fetch your events",
     "deleteError": "Failed to delete event",
-    "backToActiveEvents": "Back Active Events"
+    "backToActiveEvents": "Back Active Events",
+    "creatingEvent": "Creating event...",
+    "createSuccess": "Event created."
   }
 }

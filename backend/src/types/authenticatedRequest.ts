@@ -1,6 +1,6 @@
 // src/types/AuthenticatedRequest.ts
-import { Request } from 'express';
-import { UserPayload } from './userPayload';
+import type { Request } from 'express';
+import type { UserPayload } from './userPayload';
 
 export interface AuthenticatedUser {
   id: number;
@@ -10,6 +10,7 @@ export interface AuthenticatedUser {
 
 export interface AuthenticatedRequest extends Request {
   user: UserPayload;
+  file?: Express.Multer.File;
 }
 export function isAuthenticated(req: Request): req is AuthenticatedRequest {
   return req.user !== undefined;

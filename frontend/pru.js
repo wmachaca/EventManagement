@@ -10,7 +10,8 @@ console.error('this is the proxy:', proxy);
 const agent = proxy ? new HttpsProxyAgent(proxy) : null;
 
 // Test the proxy by making a GET request to google.com
-axios.get('https://www.google.com', { httpsAgent: agent })
+axios
+  .get('https://www.google.com', { httpsAgent: agent })
   .then(response => {
     console.log('Response data:', response.data);
   })
@@ -23,4 +24,3 @@ axios.get('https://www.google.com', { httpsAgent: agent })
       console.error('Error config:', error.config);
     }
   });
-

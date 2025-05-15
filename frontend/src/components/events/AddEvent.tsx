@@ -1,163 +1,163 @@
+// components/events/AddEvent.tsx
+'use client';
+
 import { useState } from 'react';
-import { EventFormData } from '@/types/event';
 
 interface AddEventProps {
-  addEvent: (eventData: EventFormData) => void;
+  onSubmit: (formData: FormData) => Promise<void>;
+  isSubmitting: boolean;
+  setSubmissionError: (error: string | null) => void;
 }
 
-export default function AddEvent({ addEvent }: AddEventProps) {
-  const [formData, setFormData] = useState<EventFormData>({
-    name: '',
-    description: '',
-    location: '',
-    schedule: new Date().toISOString().slice(0, 16),
-    capacity: 10,
-    isVirtual: false,
-    status: 'DRAFT',
-  });
+export default function AddEvent({ onSubmit, isSubmitting, setSubmissionError }: AddEventProps) {
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isVirtual, setIsVirtual] = useState(false);
+  const [location, setLocation] = useState('');
+  const [virtualLink, setVirtualLink] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [capacity, setCapacity] = useState(50);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim()) return;
-    addEvent(formData);
-
-    // Reset form
-    setFormData({
-      name: '',
-      description: '',
-      location: '',
-      schedule: new Date().toISOString().slice(0, 16),
-      capacity: 10,
-      isVirtual: false,
-      status: 'DRAFT',
-    });
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  ) => {
-    const { name, value, type } = e.target; //put name inside input
-    const checked = (e.target as HTMLInputElement).checked;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmissionError(null);
 
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('description', description);
+    formData.append('isVirtual', isVirtual.toString());
+    formData.append('location', location);
+    formData.append('virtualLink', virtualLink);
+    formData.append('capacity', capacity.toString());
+    formData.append('startDate', new Date(startDate).toISOString());
+    formData.append('endDate', new Date(endDate).toISOString());
+    formData.append('contactEmail', contactEmail);
+    formData.append('status', 'DRAFT');
+    if (image) formData.append('image', image);
+
+    await onSubmit(formData);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-          Event Name *
-        </label>
+        <label className="block font-semibold mb-1">Event Name *</label>
         <input
           type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          value={name}
+          onChange={e => setName(e.target.value)}
           required
+          className="w-full p-2 border border-gray-300 rounded"
         />
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-          Description
-        </label>
+        <label className="block font-semibold mb-1">Description</label>
         <textarea
-          id="description"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          rows={3}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded"
         />
       </div>
 
-      <div className="flex items-center">
-        <input
-          type="checkbox"
-          id="isVirtual"
-          name="isVirtual"
-          checked={formData.isVirtual}
-          onChange={handleChange}
-          className="mr-2"
-        />
-        <label htmlFor="isVirtual" className="text-sm font-medium text-gray-700">
-          Virtual Event
-        </label>
+      <div>
+        <label className="block font-semibold mb-1">Event Image</label>
+        <input type="file" accept="image/*" onChange={handleImageChange} />
+        {imagePreview && <img src={imagePreview} alt="Preview" className="mt-2 max-w-xs" />}
       </div>
 
-      {!formData.isVirtual && (
+      <div className="flex items-center space-x-2">
+        <input type="checkbox" checked={isVirtual} onChange={e => setIsVirtual(e.target.checked)} />
+        <label>Is Virtual?</label>
+      </div>
+
+      {!isVirtual && (
         <div>
-          <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-            Location *
-          </label>
+          <label className="block font-semibold mb-1">Location</label>
           <input
             type="text"
-            id="location"
-            name="location"
-            value={formData.location}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            required={!formData.isVirtual}
+            value={location}
+            onChange={e => setLocation(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+        </div>
+      )}
+
+      {isVirtual && (
+        <div>
+          <label className="block font-semibold mb-1">Virtual Link</label>
+          <input
+            type="url"
+            value={virtualLink}
+            onChange={e => setVirtualLink(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
       )}
 
       <div>
-        <label htmlFor="schedule" className="block text-sm font-medium text-gray-700 mb-1">
-          Date & Time *
-        </label>
+        <label className="block font-semibold mb-1">Start Date</label>
         <input
-          type="datetime-local"
-          id="schedule"
-          name="schedule"
-          value={formData.schedule}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          required
+          type="date"
+          value={startDate}
+          onChange={e => setStartDate(e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded"
         />
       </div>
 
       <div>
-        <label htmlFor="capacity" className="block text-sm font-medium text-gray-700 mb-1">
-          Capacity
-        </label>
+        <label className="block font-semibold mb-1">End Date</label>
+        <input
+          type="date"
+          value={endDate}
+          onChange={e => setEndDate(e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded"
+        />
+      </div>
+
+      <div>
+        <label className="block font-semibold mb-1">Contact Email</label>
+        <input
+          type="email"
+          value={contactEmail}
+          onChange={e => setContactEmail(e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded"
+        />
+      </div>
+
+      <div>
+        <label className="block font-semibold mb-1">Capacity</label>
         <input
           type="number"
-          id="capacity"
-          name="capacity"
-          min="1"
-          value={formData.capacity}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          min={1}
+          value={capacity}
+          onChange={e => setCapacity(Number(e.target.value))}
+          className="w-full p-2 border border-gray-300 rounded"
         />
-      </div>
-
-      <div>
-        <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-          Status
-        </label>
-        <select
-          id="status"
-          name="status"
-          value={formData.status}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="DRAFT">Draft</option>
-          <option value="PUBLISHED">Published</option>
-        </select>
       </div>
 
       <button
         type="submit"
-        className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        disabled={isSubmitting}
+        className="bg-blue-600 hover:bg-blue-700 text-white w-full py-2 rounded-md transition disabled:opacity-50"
       >
-        Create Event
+        {isSubmitting ? 'Creating...' : 'Create Event'}
       </button>
     </form>
   );

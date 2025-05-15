@@ -22,4 +22,5 @@ build/
 
 # IDE (JetBrains)
 .idea/
-
+# Public files
+public/
