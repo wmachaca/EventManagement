@@ -16,6 +16,7 @@ export default function CreateEventPage() {
   const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   const handleCreateEvent = async (formData: FormData) => {
+    console.log('Submitting event...'); // add this line
     if (!session?.accessToken) {
       setSubmissionError(t('authError'));
       return;
@@ -36,7 +37,9 @@ export default function CreateEventPage() {
       toast.success(t('createSuccess'), { id: toastId });
       router.push('/en/events/myevents');
     } catch (error) {
-      console.error('Event creation failed:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('API Error:', error.response?.data);
+      }
 
       setSubmissionError(getErrorMessage(error));
     } finally {

@@ -54,13 +54,6 @@ export const createEventValidator = [
     .withMessage('isVirtual must be a boolean')
     .toBoolean(),
 
-  body('creatorId')
-    .notEmpty()
-    .withMessage('Creator ID is required')
-    .isInt({ min: 1 })
-    .withMessage('Creator ID must be a positive integer')
-    .toInt(),
-
   // Conditional and optional fields
   body('description')
     .optional()

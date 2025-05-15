@@ -1,5 +1,5 @@
 //src/models/event.ts
-import { EventStatus, ApplicationStatus, EventApplication, User, Event } from '@prisma/client';
+import type { EventStatus, ApplicationStatus, EventApplication, User, Event } from '@prisma/client';
 
 export interface CreateEventInput {
   name: string;

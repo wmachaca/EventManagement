@@ -13,6 +13,7 @@ type FormattedError = {
 export const validate = (req: Request, res: Response, next: NextFunction): void => {
   const errors: Result<ValidationError> = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log('Validation errors inside middleware:', errors.array());
     const formattedErrors: FormattedError[] = errors.array().map(error => {
       // In express-validator v7+, field errors have `path`, while others might not
       const field = 'path' in error ? error.path : 'unknown';

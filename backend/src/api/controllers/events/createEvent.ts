@@ -29,6 +29,7 @@ export const createEvent = async (req: Request, res: Response) => {
     const input: CreateEventInput = {
       ...req.body,
       creatorId: req.user.userId,
+      imageUrl,
     };
     console.log('Creating event with:', input);
     const event = await eventService.createEvent(input);

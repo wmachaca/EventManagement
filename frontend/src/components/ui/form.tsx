@@ -15,17 +15,29 @@ import {
   type UseFormReturn,
   type Path,
 } from 'react-hook-form';
+import { Slot } from '@radix-ui/react-slot';
 import { cn } from '@/lib/utils';
 
 // Typed Form component
 export function Form<T extends FieldValues>({
   children,
   form,
+  onSubmit,
+  className,
 }: {
   children: React.ReactNode;
   form: UseFormReturn<T>;
+  onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
+  className?: string;
 }) {
-  return <FormProvider {...form}>{children}</FormProvider>;
+  return (
+    // <-- You were missing this
+    <FormProvider {...form}>
+      <form onSubmit={onSubmit ?? form.handleSubmit(() => {})} className={className}>
+        {children}
+      </form>
+    </FormProvider>
+  );
 }
 
 interface FormFieldProps<T extends FieldValues> extends Omit<UseControllerProps<T>, 'render'> {
@@ -56,9 +68,18 @@ export function FormLabel({ className, ...props }: React.LabelHTMLAttributes<HTM
   return <label className={cn('text-sm font-medium leading-none', className)} {...props} />;
 }
 
-export function FormControl({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn(className)} {...props} />;
+export interface FormControlProps extends React.HTMLAttributes<HTMLElement> {
+  asChild?: boolean;
 }
+
+export const FormControl = React.forwardRef<HTMLDivElement, FormControlProps>(
+  ({ className, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : 'div';
+    return <Comp ref={ref} className={cn(className)} {...props} />;
+  },
+);
+
+FormControl.displayName = 'FormControl';
 
 interface FormMessageProps {
   name?: string;
