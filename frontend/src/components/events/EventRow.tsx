@@ -5,8 +5,11 @@ import {
   ArrowPathIcon,
   CalendarIcon,
   MapPinIcon,
+  UserGroupIcon,
+  EyeIcon,
 } from '@heroicons/react/24/outline';
-import { Event, EventStatus } from '@/types/event';
+import type { Event, EventStatus } from '@/types/event';
+import { useRouter } from 'next/navigation';
 
 interface EventRowProps {
   event: Event;
@@ -26,6 +29,7 @@ export default function EventRow({
   const [isEditing, setIsEditing] = useState(false);
   const [editedEvent, setEditedEvent] = useState<Event>({ ...event });
   const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter();
 
   const statusColors: Record<EventStatus, string> = {
     DRAFT: 'bg-gray-100 text-gray-800',
@@ -51,6 +55,23 @@ export default function EventRow({
     }
   };
 
+  const viewRegistrations = () => {
+    router.push(`/events/${event.id}/registrations`);
+  };
+
+  const viewDetails = () => {
+    router.push(`/events/${event.id}`);
+  };
+
+  const formatDate = (date: Date | string | null | undefined) => {
+    if (!date) return '-';
+    return new Date(date).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
   return (
     <tr className="hover:bg-gray-50 transition-colors">
       <td className="px-6 py-4 whitespace-nowrap">
@@ -66,19 +87,6 @@ export default function EventRow({
         )}
       </td>
 
-      <td className="px-6 py-4">
-        {isEditing ? (
-          <textarea
-            value={editedEvent.description || ''}
-            onChange={e => setEditedEvent({ ...editedEvent, description: e.target.value })}
-            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-            rows="2"
-          />
-        ) : (
-          <div className="text-sm text-gray-500">{event.description || '-'}</div>
-        )}
-      </td>
-
       <td className="px-6 py-4 whitespace-nowrap">
         {isEditing ? (
           <div className="space-y-2">
@@ -88,7 +96,7 @@ export default function EventRow({
               onChange={e => setEditedEvent({ ...editedEvent, isVirtual: e.target.checked })}
               className="mr-2"
             />
-            <label>Virtual Event</label>
+            <label>Virtual</label>
             {!editedEvent.isVirtual && (
               <input
                 type="text"
@@ -102,7 +110,7 @@ export default function EventRow({
         ) : (
           <div className="flex items-center">
             {event.isVirtual ? (
-              <span className="text-sm text-gray-500">Virtual Event</span>
+              <span className="text-sm text-gray-500">Virtual</span>
             ) : (
               <>
                 <MapPinIcon className="h-4 w-4 mr-1 text-gray-500" />
@@ -117,16 +125,35 @@ export default function EventRow({
         {isEditing ? (
           <input
             type="datetime-local"
-            value={editedEvent.schedule}
-            onChange={e => setEditedEvent({ ...editedEvent, schedule: e.target.value })}
+            value={editedEvent.startDate.toString()}
+            onChange={e => setEditedEvent({ ...editedEvent, startDate: new Date(e.target.value) })}
             className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
           />
         ) : (
           <div className="flex items-center">
             <CalendarIcon className="h-4 w-4 mr-1 text-gray-500" />
-            <span className="text-sm text-gray-500">
-              {new Date(event.schedule).toLocaleString()}
-            </span>
+            <span className="text-sm text-gray-500">{formatDate(event.startDate)}</span>
+          </div>
+        )}
+      </td>
+
+      <td className="px-6 py-4 whitespace-nowrap">
+        {isEditing ? (
+          <input
+            type="datetime-local"
+            value={editedEvent.endDate?.toString() || ''}
+            onChange={e =>
+              setEditedEvent({
+                ...editedEvent,
+                endDate: e.target.value ? new Date(e.target.value) : null,
+              })
+            }
+            className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
+          />
+        ) : (
+          <div className="flex items-center">
+            <CalendarIcon className="h-4 w-4 mr-1 text-gray-500" />
+            <span className="text-sm text-gray-500">{formatDate(event.endDate)}</span>
           </div>
         )}
       </td>
@@ -135,7 +162,9 @@ export default function EventRow({
         {isEditing ? (
           <select
             value={editedEvent.status}
-            onChange={e => setEditedEvent({ ...editedEvent, status: e.target.value })}
+            onChange={e =>
+              setEditedEvent({ ...editedEvent, status: e.target.value as EventStatus })
+            }
             className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
           >
             <option value="DRAFT">Draft</option>
@@ -153,19 +182,22 @@ export default function EventRow({
 
       {isDeletedView && (
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-          {event.deletedAt ? new Date(event.deletedAt).toLocaleString() : '-'}
+          {event.deletedAt ? formatDate(event.deletedAt) : '-'}
         </td>
       )}
 
       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
         {isEditing ? (
           <>
-            <button onClick={handleUpdate} className="text-blue-600 hover:text-blue-900">
+            <button
+              onClick={handleUpdate}
+              className="text-blue-600 hover:text-blue-900 inline-flex items-center"
+            >
               Save
             </button>
             <button
               onClick={() => setIsEditing(false)}
-              className="text-gray-600 hover:text-gray-900"
+              className="text-gray-600 hover:text-gray-900 inline-flex items-center"
             >
               Cancel
             </button>
@@ -187,18 +219,31 @@ export default function EventRow({
               title="Permanently delete"
             >
               <TrashIcon className="h-5 w-5 mr-1" />
-              {isDeleting ? 'Deleting...' : 'Permanent Delete'}
+              {isDeleting ? 'Deleting...' : 'Delete'}
             </button>
           </>
         ) : (
-          <>
+          <div className="flex space-x-2">
+            <button
+              onClick={viewDetails}
+              className="text-gray-600 hover:text-gray-900 inline-flex items-center"
+              title="View details"
+            >
+              <EyeIcon className="h-5 w-5" />
+            </button>
             <button
               onClick={() => setIsEditing(true)}
               className="text-blue-600 hover:text-blue-900 inline-flex items-center"
               title="Edit event"
             >
-              <PencilIcon className="h-5 w-5 mr-1" />
-              Edit
+              <PencilIcon className="h-5 w-5" />
+            </button>
+            <button
+              onClick={viewRegistrations}
+              className="text-purple-600 hover:text-purple-900 inline-flex items-center"
+              title="View registrations"
+            >
+              <UserGroupIcon className="h-5 w-5" />
             </button>
             <button
               onClick={handleDelete}
@@ -206,10 +251,9 @@ export default function EventRow({
               className="text-red-600 hover:text-red-900 inline-flex items-center"
               title="Delete event"
             >
-              <TrashIcon className="h-5 w-5 mr-1" />
-              {isDeleting ? 'Deleting...' : 'Delete'}
+              <TrashIcon className="h-5 w-5" />
             </button>
-          </>
+          </div>
         )}
       </td>
     </tr>
