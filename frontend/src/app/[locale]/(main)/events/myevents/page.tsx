@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Event } from '@/types/event';
+import type { Event } from '@/types/event';
 import EventList from '@/components/events/EventList';
 import { useTranslations } from 'next-intl';
 import { TrashIcon, ArrowPathIcon } from '@heroicons/react/24/outline';

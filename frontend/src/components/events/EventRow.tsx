@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import type { Event, EventStatus } from '@/types/event';
 import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 
 interface EventRowProps {
   event: Event;
@@ -29,6 +30,7 @@ export default function EventRow({
   const [isEditing, setIsEditing] = useState(false);
   const [editedEvent, setEditedEvent] = useState<Event>({ ...event });
   const [isDeleting, setIsDeleting] = useState(false);
+  const locale = useLocale();
   const router = useRouter();
 
   const statusColors: Record<EventStatus, string> = {
@@ -60,7 +62,7 @@ export default function EventRow({
   };
 
   const viewDetails = () => {
-    router.push(`/events/${event.id}`);
+    router.push(`/${locale}/events/${event.id}`);
   };
 
   const formatDate = (date: Date | string | null | undefined) => {
