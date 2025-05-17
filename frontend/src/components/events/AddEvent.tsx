@@ -204,7 +204,9 @@ export default function AddEvent({
         disabled={isSubmitting}
         className="bg-blue-600 hover:bg-blue-700 text-white w-full py-2 rounded-md transition disabled:opacity-50"
       >
-        {isSubmitting ? 'Creating...' : 'Create Event'}
+  {isSubmitting 
+    ? (isEditMode ? 'Updating...' : 'Creating...') 
+    : (isEditMode ? 'Update Event' : 'Create Event')}
       </button>
     </form>
   );
