@@ -28,8 +28,13 @@ app.use(helmet());
 app.use(morgan('dev'));
 app.use(filterAuthData());
 
-// Serve images statically
+// Allow cross-origin image loading for images
+app.use('/images', (req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+});
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
+
 
 // Routes
 app.use('/api/auth', authRoutes);

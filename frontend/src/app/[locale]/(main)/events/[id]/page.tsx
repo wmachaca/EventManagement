@@ -243,7 +243,7 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
           {event.imageUrl && (
             <div className="mb-6 rounded-lg overflow-hidden">
               <img
-                src={event.imageUrl}
+                src={`${process.env.NEXT_PUBLIC_API_URL}${event.imageUrl}`}
                 alt={event.name}
                 className="w-full h-64 md:h-96 object-cover"
               />
