@@ -29,7 +29,7 @@ router.get('/my', listMyEvents);
 router.get('/all', listAllEvents);
 router.get('/trash', getDeletedEvents);
 router.get('/:id', eventExists, getEvent);
-router.put('/:id', eventExists, isEventCreator, updateEventValidator, validate, updateEvent);
+router.put('/:id', eventExists, isEventCreator, uploadSingleImage, updateEventValidator, validate, updateEvent);
 
 // Event applications
 router.post('/:eventId/apply', eventExists, applyToEvent);

@@ -53,6 +53,12 @@
     "deleteError": "Failed to delete event",
     "backToActiveEvents": "Back Active Events",
     "creatingEvent": "Creating event...",
-    "createSuccess": "Event created."
+    "createSuccess": "Event created.",
+    "updatingEvent": "Updating event...",
+    "backToEvents": "Back to events",
+    "editTitle": "Edit Event",
+    "updateSuccess": "Event updated successfully",
+    "updateError": "Failed to update event",
+    "authError": "Authentication required"    
   }
 }

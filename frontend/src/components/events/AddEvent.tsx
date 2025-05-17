@@ -1,26 +1,50 @@
 // components/events/AddEvent.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
 
 interface AddEventProps {
   onSubmit: (formData: FormData) => Promise<void>;
   isSubmitting: boolean;
   setSubmissionError: (error: string | null) => void;
+  isEditMode?: boolean;
+  currentEvent?: any;
 }
 
-export default function AddEvent({ onSubmit, isSubmitting, setSubmissionError }: AddEventProps) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+
+    const formatDateForInput = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0];
+  };
+
+export default function AddEvent({
+  onSubmit,
+  isSubmitting,
+  setSubmissionError,
+  isEditMode = false,
+  currentEvent = null,
+}: AddEventProps) {
+  // Initialize all fields with empty values or current event data
+  const [name, setName] = useState(currentEvent?.name || '');
+  const [description, setDescription] = useState(currentEvent?.description || '');
   const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [isVirtual, setIsVirtual] = useState(false);
-  const [location, setLocation] = useState('');
-  const [virtualLink, setVirtualLink] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [contactEmail, setContactEmail] = useState('');
-  const [capacity, setCapacity] = useState(50);
+  const [isVirtual, setIsVirtual] = useState(currentEvent?.isVirtual || false);
+  const [location, setLocation] = useState(currentEvent?.location || '');
+  const [virtualLink, setVirtualLink] = useState(currentEvent?.virtualLink || '');
+  const [startDate, setStartDate] = useState(currentEvent?.startDate ? formatDateForInput(currentEvent.startDate) : '');
+  const [endDate, setEndDate] = useState(currentEvent?.endDate ? formatDateForInput(currentEvent.endDate) : '');
+  const [contactEmail, setContactEmail] = useState(currentEvent?.contactEmail || '');
+  const [capacity, setCapacity] = useState(currentEvent?.capacity || 50);
+  const [status, setStatus] = useState(currentEvent?.status || 'DRAFT');
+  const [imagePreview, setImagePreview] = useState(
+  currentEvent?.imageUrl 
+    ? `${process.env.NEXT_PUBLIC_API_URL}${currentEvent.imageUrl}`
+    : null
+);
+
+
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -39,17 +63,30 @@ export default function AddEvent({ onSubmit, isSubmitting, setSubmissionError }:
     setSubmissionError(null);
 
     const formData = new FormData();
+    // Required fields
     formData.append('name', name);
-    formData.append('description', description);
-    formData.append('isVirtual', isVirtual.toString());
-    formData.append('location', location);
-    formData.append('virtualLink', virtualLink);
     formData.append('capacity', capacity.toString());
     formData.append('startDate', new Date(startDate).toISOString());
-    formData.append('endDate', new Date(endDate).toISOString());
-    formData.append('contactEmail', contactEmail);
-    formData.append('status', 'DRAFT');
-    if (image) formData.append('image', image);
+    formData.append('status', status);
+    
+    // Optional fields - send empty string instead of null/undefined
+    formData.append('description', description || '');
+    formData.append('isVirtual', isVirtual.toString());
+    formData.append('location', isVirtual ? '' : location || '');
+    formData.append('virtualLink', isVirtual ? virtualLink || '' : '');
+    formData.append('endDate', endDate ? new Date(endDate).toISOString() : '');
+    formData.append('contactEmail', contactEmail || '');
+    
+    // Only append image if a new one was selected
+    if (image) {
+      formData.append('image', image);
+    }
+
+    // Debug: log form data before submission
+    console.log('FormData contents:');
+    for (const [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
 
     await onSubmit(formData);
   };
@@ -79,7 +116,17 @@ export default function AddEvent({ onSubmit, isSubmitting, setSubmissionError }:
       <div>
         <label className="block font-semibold mb-1">Event Image</label>
         <input type="file" accept="image/*" onChange={handleImageChange} />
-        {imagePreview && <img src={imagePreview} alt="Preview" className="mt-2 max-w-xs" />}
+  {imagePreview && (
+    <img 
+      src={imagePreview} 
+      alt="Preview" 
+      className="mt-2 max-w-xs h-auto rounded"
+      onError={(e) => {
+        // Fallback if image fails to load
+        (e.target as HTMLImageElement).style.display = 'none';
+      }}
+    />
+  )}
       </div>
 
       <div className="flex items-center space-x-2">
