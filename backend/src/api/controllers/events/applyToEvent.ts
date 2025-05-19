@@ -13,9 +13,24 @@ export const applyToEvent = async (req: Request, res: Response) => {
       userId: req.user.userId,
     };
 
+    // Validate input
+    if (isNaN(input.eventId)) {
+      return res.status(400).json({ message: 'Invalid event ID' });
+    }
+
     const application = await eventService.applyToEvent(input.eventId, input.userId);
-    res.status(201).json(application);
-  } catch (error) {
-    res.status(500).json({ message: 'Error applying to event', error });
+    return res.status(201).json(application);
+  } catch (error: any) {
+    console.error('Apply to event error:', error);
+    const status = error.message.includes('not found')
+      ? 404
+      : error.message.includes('already registered')
+        ? 409
+        : error.message.includes('full capacity')
+          ? 403
+          : 500;
+    return res.status(status).json({
+      message: error.message || 'Error applying to event',
+    });
   }
 };

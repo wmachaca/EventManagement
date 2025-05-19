@@ -10,3 +10,5 @@ export { updateApplicationStatus } from './updateApplicationStatus';
 export { deleteEvent } from './deleteEvent'; // Add this
 export { restoreEvent } from './restoreEvent'; // Add this
 export { getDeletedEvents } from './getDeletedEvents';
+export { checkUserRegistration } from './checkUserRegistration';
+export { cancelRegistration } from './cancelRegistration';

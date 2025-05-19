@@ -11,6 +11,8 @@ import {
   deleteEvent,
   restoreEvent,
   getDeletedEvents,
+  checkUserRegistration,
+  cancelRegistration,
 } from '../controllers/events/index';
 import { authMiddleware } from '../middleware/authMiddleware';
 import { eventExists, isEventCreator } from '../middleware/eventAccess';
@@ -29,12 +31,23 @@ router.get('/my', listMyEvents);
 router.get('/all', listAllEvents);
 router.get('/trash', getDeletedEvents);
 router.get('/:id', eventExists, getEvent);
-router.put('/:id', eventExists, isEventCreator, uploadSingleImage, updateEventValidator, validate, updateEvent);
+router.put(
+  '/:id',
+  eventExists,
+  isEventCreator,
+  uploadSingleImage,
+  updateEventValidator,
+  validate,
+  updateEvent,
+);
 
 // Event applications
 router.post('/:eventId/apply', eventExists, applyToEvent);
 router.get('/:eventId/applications', eventExists, getApplications);
+router.get('/:eventId/registration', eventExists, checkUserRegistration);
+router.delete('/:eventId/apply', eventExists, cancelRegistration);
 router.put('/applications/:applicationId', updateApplicationStatus);
+
 // Delete route
 router.delete('/:id', eventExists, isEventCreator, deleteEvent);
 

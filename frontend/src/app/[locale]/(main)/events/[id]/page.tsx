@@ -60,6 +60,7 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
   };
 
   const checkRegistration = async () => {
+    console.error('I am inside checkregistration:');
     try {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.id}/registration`,
@@ -79,14 +80,14 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
     setIsRegistering(true);
     try {
       if (isRegistered) {
-        await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.id}/register`, {
+        await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.id}/apply`, {
           headers: {
             Authorization: `Bearer ${session?.accessToken}`,
           },
         });
       } else {
         await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.id}/register`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.id}/apply`,
           {},
           {
             headers: {
@@ -99,6 +100,7 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
     } catch (err) {
       console.error(err);
       setError(t('registrationError') || 'Failed to process registration');
+      await checkRegistration();
     } finally {
       setIsRegistering(false);
     }
