@@ -1,6 +1,6 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import * as eventService from '../../../services/eventService';
-import { EventApplicationInput } from '../../../models/event';
+import type { EventApplicationInput } from '../../../models/event';
 import { isAuthenticated } from '../../../types/authenticatedRequest';
 
 export const applyToEvent = async (req: Request, res: Response) => {

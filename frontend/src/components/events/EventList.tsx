@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import EventTable from './EventTable';
-import { Event, EventStatus } from '@/types/event';
+import type { Event, EventStatus } from '@/types/event';
 
 interface EventListProps {
   events: Event[];
@@ -22,7 +22,11 @@ export default function EventList({
   const [statusFilter, setStatusFilter] = useState<EventStatus | 'ALL'>('ALL');
   const [typeFilter, setTypeFilter] = useState<'ALL' | 'VIRTUAL' | 'IN_PERSON'>('ALL');
 
-  const filteredEvents = events.filter(event => {
+  // Ensure events is always an array before filtering
+  const safeEvents = Array.isArray(events) ? events : [];
+  console.log('Safe events:', safeEvents);
+
+  const filteredEvents = safeEvents.filter(event => {
     //const isOwned = event.creatorId === currentUserId;
     const statusMatch = statusFilter === 'ALL' || event.status === statusFilter;
     const typeMatch =

@@ -49,6 +49,7 @@
     "allEvents": "All Events",
     "viewDeletedEvents": "See deleted events",
     "deletedEvents": "Deleted events",
+    "noDeletedEvents": "There is no deleted events",
     "fetchError": "Failed to fetch your events",
     "deleteError": "Failed to delete event",
     "backToActiveEvents": "Back Active Events",
@@ -59,6 +60,6 @@
     "editTitle": "Edit Event",
     "updateSuccess": "Event updated successfully",
     "updateError": "Failed to update event",
-    "authError": "Authentication required"    
+    "authError": "Authentication required"
   }
 }
