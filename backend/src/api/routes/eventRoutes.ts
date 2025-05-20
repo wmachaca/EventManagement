@@ -19,6 +19,10 @@ import { eventExists, isEventCreator } from '../middleware/eventAccess';
 import { validate } from '../middleware/validate';
 import { uploadSingleImage } from '../middleware/upload';
 import { createEventValidator, updateEventValidator } from '../validators/eventValidator';
+import {
+  applyToEventValidator,
+  cancelRegistrationValidator,
+} from '../validators/registrationValidator';
 const router = Router();
 
 // Applies to all routes below
@@ -42,10 +46,10 @@ router.put(
 );
 
 // Event applications
-router.post('/:eventId/apply', eventExists, applyToEvent);
+router.post('/:eventId/apply', eventExists, applyToEventValidator, applyToEvent);
 router.get('/:eventId/applications', eventExists, getApplications);
 router.get('/:eventId/registration', eventExists, checkUserRegistration);
-router.delete('/:eventId/apply', eventExists, cancelRegistration);
+router.delete('/:eventId/apply', eventExists, cancelRegistrationValidator, cancelRegistration);
 router.put('/applications/:applicationId', updateApplicationStatus);
 
 // Delete route

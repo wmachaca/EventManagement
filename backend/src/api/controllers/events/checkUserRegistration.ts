@@ -1,23 +1,30 @@
 import type { Request, Response } from 'express';
 import * as eventService from '../../../services/eventService';
 import { isAuthenticated } from '../../../types/authenticatedRequest';
+import { ApplicationError } from '../../../errors/ApplicationError';
 
 export const checkUserRegistration = async (req: Request, res: Response) => {
   try {
-    if (!isAuthenticated(req)) return res.status(401).json({ message: 'Unauthorized' });
+    if (!isAuthenticated(req)) {
+      throw new ApplicationError('Unauthorized', 401);
+    }
 
     const eventId = parseInt(req.params.eventId);
     if (isNaN(eventId)) {
-      return res.status(400).json({ message: 'Invalid event ID' });
+      throw new ApplicationError('Invalid event ID', 400);
     }
-    const userId = req.user.userId;
+    const registrationInfo = await eventService.checkUserRegistration(eventId, req.user.userId);
 
-    const isRegistered = await eventService.checkUserRegistration(eventId, userId);
-    return res.status(200).json({ isRegistered });
+    res.status(200).json({
+      success: true,
+      data: registrationInfo,
+    });
   } catch (error: any) {
     console.error('Check registration error:', error);
-    return res.status(500).json({
-      message: error.message || 'Error checking registration',
+    const status = error.statusCode || 500;
+    res.status(status).json({
+      success: false,
+      message: error.message || 'Failed to check registration status',
     });
   }
 };

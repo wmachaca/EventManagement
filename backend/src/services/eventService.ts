@@ -1,6 +1,6 @@
 import type { ApplicationStatus } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
-import type { CreateEventInput, UpdateEventInput } from '../models/event';
+import type { CreateEventInput, UpdateEventInput, ApplicationDetails } from '../models/event';
 
 const prisma = new PrismaClient();
 
@@ -117,108 +117,136 @@ export const restoreEvent = async (eventId: number, creatorId: number) => {
 };
 
 export const applyToEvent = async (eventId: number, userId: number) => {
-  const event = await prisma.event.findUnique({
-    where: { id: eventId },
-    include: { attendees: true, applications: true },
-  });
+  return await prisma.$transaction(async tx => {
+    // 1. Fetch event (include requiresApproval)
+    const event = await tx.event.findUnique({
+      where: { id: eventId, isDeleted: false },
+      select: {
+        id: true,
+        status: true,
+        capacity: true,
+        requiresApproval: true,
+        applications: {
+          where: { userId },
+          select: { status: true },
+        },
+        _count: {
+          select: { attendees: true },
+        },
+      },
+    });
 
-  if (!event) {
-    throw new Error('Event not found');
-  }
+    if (!event) throw new Error('Event not found or has been deleted');
+    if (event.status !== 'PUBLISHED') throw new Error('Event is not open for registration');
+    if (event.applications.length > 0) {
+      throw new Error(
+        `You already have a ${event.applications[0].status.toLowerCase()} application`,
+      );
+    }
+    if (event._count.attendees >= event.capacity) throw new Error('Event is full');
 
-  // Check if user is already registered
-  const existingRegistration = event.attendees.some(attendee => attendee.id === userId);
-  if (existingRegistration) {
-    throw new Error('User already registered for this event');
-  }
-
-  // Check if event is at capacity
-  if (event.attendees.length >= event.capacity) {
-    throw new Error('Event is at full capacity');
-  }
-
-  // Create both the application and add to attendees
-  const [application] = await prisma.$transaction([
-    prisma.eventApplication.create({
+    // 2. Create application (PENDING if requires approval, else APPROVED)
+    return tx.eventApplication.create({
       data: {
         eventId,
         userId,
-        status: 'APPROVED', // Assuming immediate approval for now
+        status: event.requiresApproval ? 'PENDING' : 'APPROVED', // 👈 Dynamic status
       },
-    }),
-    prisma.event.update({
-      where: { id: eventId },
-      data: {
-        attendees: {
-          connect: { id: userId },
-        },
+      include: {
+        event: { select: { name: true, startDate: true } },
+        user: { select: { name: true, email: true } },
       },
-    }),
-  ]);
-
-  return application;
+    });
+  });
 };
 
 export const cancelRegistration = async (eventId: number, userId: number) => {
-  const event = await prisma.event.findUnique({
-    where: { id: eventId },
-    include: { attendees: true, applications: true },
+  return await prisma.$transaction(async tx => {
+    // 1. Verify event exists
+    const event = await tx.event.findUnique({
+      where: { id: eventId, isDeleted: false },
+    });
+
+    if (!event) {
+      throw new Error('Event not found or has been deleted');
+    }
+
+    // 2. Check if cancellation is allowed (based on event start date)
+    const now = new Date();
+    if (event.startDate <= now) {
+      throw new Error('Cannot cancel registration after event has started');
+    }
+
+    // 3. Delete application and remove from attendees if approved
+    const [application] = await Promise.all([
+      tx.eventApplication.deleteMany({
+        where: {
+          eventId,
+          userId,
+          status: { in: ['PENDING', 'APPROVED'] },
+        },
+      }),
+      tx.event.update({
+        where: { id: eventId },
+        data: {
+          attendees: {
+            disconnect: { id: userId },
+          },
+        },
+      }),
+    ]);
+
+    if (application.count === 0) {
+      throw new Error('No active registration found to cancel');
+    }
+
+    return true;
   });
+};
+
+export const checkUserRegistration = async (
+  eventId: number,
+  userId: number,
+): Promise<ApplicationDetails> => {
+  const [event, application] = await Promise.all([
+    prisma.event.findUnique({
+      where: { id: eventId, isDeleted: false },
+      select: {
+        id: true,
+        name: true,
+        startDate: true,
+        capacity: true,
+        _count: {
+          select: { attendees: true },
+        },
+      },
+    }),
+    prisma.eventApplication.findFirst({
+      where: { eventId, userId },
+    }),
+  ]);
 
   if (!event) {
     throw new Error('Event not found');
   }
 
-  // Check if user is registered
-  const isRegistered = event.attendees.some(attendee => attendee.id === userId);
-  if (!isRegistered) {
-    throw new Error('User is not registered for this event');
-  }
-
-  // Remove both the application and attendee
-  await prisma.$transaction([
-    prisma.eventApplication.deleteMany({
-      where: {
-        eventId,
-        userId,
-      },
-    }),
-    prisma.event.update({
-      where: { id: eventId },
-      data: {
-        attendees: {
-          disconnect: { id: userId },
-        },
-      },
-    }),
-  ]);
-
-  return true;
-};
-
-export const checkUserRegistration = async (eventId: number, userId: number) => {
-  const [application, attendee] = await Promise.all([
-    prisma.eventApplication.findFirst({
-      where: {
-        eventId,
-        userId,
-      },
-    }),
-    prisma.event.findFirst({
-      where: {
-        id: eventId,
-        attendees: {
-          some: {
-            id: userId,
-          },
-        },
-      },
-    }),
-  ]);
-
   return {
-    isRegistered: !!application || !!attendee,
+    isRegistered:
+      !!application ||
+      (await prisma.event.count({
+        where: {
+          id: eventId,
+          attendees: { some: { id: userId } },
+        },
+      })) > 0,
     applicationStatus: application?.status || null,
+    eventDetails: {
+      id: event.id,
+      name: event.name,
+      startDate: event.startDate,
+      capacity: event.capacity,
+      currentAttendees: event._count.attendees,
+    },
   };
 };
 

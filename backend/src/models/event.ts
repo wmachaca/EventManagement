@@ -47,3 +47,15 @@ export type EventWithApplications = Event & {
 export type EventWithCreator = Event & {
   creator: User;
 };
+
+export type ApplicationDetails = {
+  isRegistered: boolean;
+  applicationStatus: ApplicationStatus | null;
+  eventDetails?: {
+    id: number;
+    name: string;
+    startDate: Date;
+    capacity: number;
+    currentAttendees: number;
+  };
+};
