@@ -27,7 +27,7 @@ export default {
   },
   existingUser: {
     name: 'Existing User',
-    email: 'existing@example.com',
+    email: 'test@example.com',
     provider: 'credentials',
     auth: {
       password: bcrypt.hashSync(testPassword, SALT_ROUNDS),
