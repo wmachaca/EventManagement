@@ -1,4 +1,5 @@
 // tests/setup.ts
+import { merge } from 'lodash';
 import { execSync } from 'child_process'; // Add this import at the top
 import { PrismaClient } from '@prisma/client';
 import request from 'supertest';
@@ -26,7 +27,9 @@ const cleanDatabase = async () => {
 };
 
 // Create a test user using fixtures
-const createTestUser = async (userData = userFixtures.existingUser) => {
+//allow overrides
+const createTestUser = async (overrides = {}) => {
+  const userData = merge({}, userFixtures.existingUser, overrides);
   return prisma.user.create({
     data: {
       name: userData.name,

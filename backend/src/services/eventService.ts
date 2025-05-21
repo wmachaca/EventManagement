@@ -19,6 +19,7 @@ export const createEvent = async (input: CreateEventInput) => {
       endDate: input.endDate ? new Date(input.endDate) : undefined,
       capacity: input.capacity,
       isVirtual: input.isVirtual,
+      virtualLink: input.virtualLink,
       imageUrl: input.imageUrl,
       status: input.status || 'DRAFT', // Default to DRAFT if not provided
       creator: {
