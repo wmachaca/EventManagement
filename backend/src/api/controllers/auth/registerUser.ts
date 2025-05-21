@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { hashPassword } from '../../../utils/password';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../../../database/client';
@@ -36,8 +36,12 @@ export const registerUser = async (req: Request<{}, {}, RegisterBody>, res: Resp
   const validation = registerSchema.safeParse(req.body);
   if (!validation.success) {
     return res.status(400).json({
+      success: false,
       message: 'Validation failed',
-      errors: validation.error.errors,
+      errors: validation.error.errors.map(err => ({
+        field: err.path.join('.'),
+        message: err.message,
+      })),
     });
   }
 
@@ -45,7 +49,12 @@ export const registerUser = async (req: Request<{}, {}, RegisterBody>, res: Resp
 
   try {
     const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser) return res.status(400).json({ message: 'User already exists' });
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: 'Email is already registered',
+      });
+    }
 
     const { hash, salt } = await hashPassword(password);
 

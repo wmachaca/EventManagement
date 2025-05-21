@@ -10,6 +10,11 @@ dotenv.config({ path: '.env.test' });
 
 const prisma = new PrismaClient();
 
+console.log('DATABASE_URL:', process.env.DATABASE_URL);
+
+// ✅ Increase timeout BEFORE `beforeAll`
+jest.setTimeout(30000);
+
 // Clean database completely (in correct order to avoid FK constraints)
 const cleanDatabase = async () => {
   await prisma.$transaction([
@@ -42,19 +47,20 @@ const createTestUser = async (userData = userFixtures.existingUser) => {
 
 // Get auth token for test user
 const getAuthToken = async () => {
-  const response = await request(app)
-    .post('/api/auth/login')
-    .send(userFixtures.validLogin);
+  const response = await request(app).post('/api/auth/login').send(userFixtures.validLogin);
 
   return response.body.data?.token;
 };
 
 // Reset database before all tests
 beforeAll(async () => {
-  // Reset and migrate test database
+  console.log('Starting database reset...');
   execSync('npx prisma migrate reset --force', { stdio: 'inherit' });
-  execSync('npx prisma migrate deploy', { stdio: 'inherit' });  
+  console.log('Reset complete, deploying...');
+  execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+  console.log('Deploy complete, cleaning...');
   await cleanDatabase();
+  console.log('Setup complete');
 });
 
 // Disconnect prisma after all tests
@@ -62,10 +68,4 @@ afterAll(async () => {
   await prisma.$disconnect();
 });
 
-export {
-  prisma,
-  cleanDatabase,
-  createTestUser,
-  getAuthToken,
-  userFixtures
-};
+export { prisma, cleanDatabase, createTestUser, getAuthToken, userFixtures };

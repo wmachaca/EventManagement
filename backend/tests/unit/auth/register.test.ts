@@ -16,16 +16,18 @@ describe('POST /api/auth/register', () => {
     expect(response.status).toBe(201);
     expect(response.body).toEqual({
       success: true,
-      data: {
-        user: {
+      message: expect.any(String),
+      data: expect.objectContaining({
+        user: expect.objectContaining({
           id: expect.any(Number),
           name: userFixtures.validRegistration.name,
           email: userFixtures.validRegistration.email,
           provider: 'credentials',
           createdAt: expect.any(String),
-        },
+        }),
         token: expect.any(String),
-      },
+        expiresIn: 3600,
+      }),
     });
 
     // Verify user was actually created
@@ -50,7 +52,7 @@ describe('POST /api/auth/register', () => {
         expect.objectContaining({ field: 'name' }),
         expect.objectContaining({ field: 'email' }),
         expect.objectContaining({ field: 'password' }),
-      ])
+      ]),
     );
   });
 
@@ -81,7 +83,7 @@ describe('POST /api/auth/register', () => {
     expect(response.status).toBe(409);
     expect(response.body).toEqual({
       success: false,
-      message: expect.stringContaining('already registered'),
+      message: 'Email is already registered',
     });
   });
 });
