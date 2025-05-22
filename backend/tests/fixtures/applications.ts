@@ -2,17 +2,28 @@ import type { EventApplication } from '@prisma/client';
 import { ApplicationStatus } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
-type PartialEventApp = Partial<Omit<EventApplication, 'id'>>;
+type EventApplicationCreateData = {
+  eventId: number;
+  userId: number;
+  status: ApplicationStatus;
+  appliedAt: Date;
+  message?: string;
+  reviewedAt?: Date | null;
+  reviewedById?: number | null;
+};
 
 export const applicationFixtures = {
-  validApplication: (reviewerId?: number): PartialEventApp => ({
+  validApplication: (reviewerId?: number): EventApplicationCreateData => ({
+    eventId: 0, // Override when used
+    userId: 0, // Override when used
     status: ApplicationStatus.PENDING,
     appliedAt: new Date(),
     message: faker.lorem.sentence(5),
-    ...(reviewerId && { reviewedById: reviewerId }),
+    reviewedAt: null,
+    reviewedById: reviewerId ?? null,
   }),
 
-  approvedApplication: (reviewerId: number): PartialEventApp => ({
+  approvedApplication: (reviewerId: number): Partial<EventApplicationCreateData> => ({
     status: ApplicationStatus.APPROVED,
     appliedAt: faker.date.past(),
     reviewedAt: new Date(),
@@ -20,7 +31,7 @@ export const applicationFixtures = {
     message: faker.lorem.sentence(5),
   }),
 
-  rejectedApplication: (reviewerId: number): PartialEventApp => ({
+  rejectedApplication: (reviewerId: number): Partial<EventApplicationCreateData> => ({
     status: ApplicationStatus.REJECTED,
     appliedAt: faker.date.past(),
     reviewedAt: new Date(),
@@ -38,29 +49,25 @@ export function generateApplicationData(
   options: {
     status?: ApplicationStatus;
     reviewerId?: number;
-    overrides?: Partial<PartialEventApp>;
+    overrides?: Partial<EventApplicationCreateData>;
   } = {},
-): PartialEventApp {
+): EventApplicationCreateData {
   const { status = ApplicationStatus.PENDING, reviewerId, overrides = {} } = options;
 
-  const base: PartialEventApp = {
+  if (status !== ApplicationStatus.PENDING && !reviewerId) {
+    throw new Error('reviewerId is required for non-PENDING statuses');
+  }
+
+  return {
     eventId,
     userId,
     status,
     appliedAt: new Date(),
     message: faker.lorem.sentence(),
+    reviewedAt: status !== ApplicationStatus.PENDING ? new Date() : null,
+    reviewedById: status !== ApplicationStatus.PENDING ? reviewerId! : null,
     ...overrides,
   };
-
-  if (status !== ApplicationStatus.PENDING) {
-    if (!reviewerId) {
-      throw new Error('reviewerId is required for non-PENDING statuses');
-    }
-    base.reviewedAt = new Date();
-    base.reviewedById = reviewerId;
-  }
-
-  return base;
 }
 
 /**
@@ -75,7 +82,7 @@ export function generateBulkApplications(
     statusPool?: ApplicationStatus[];
     defaultStatus?: ApplicationStatus;
   } = {},
-): PartialEventApp[] {
+): EventApplicationCreateData[] {
   const {
     statusPool = [
       ApplicationStatus.PENDING,
