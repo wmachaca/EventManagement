@@ -1,8 +1,8 @@
 // src/api/middleware/authMiddleware.ts
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../../database/client';
-import { UserPayload } from '../../types/userPayload';
+import type { UserPayload } from '../../types/userPayload';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 if (!JWT_SECRET) throw new Error('JWT_SECRET is not defined');
@@ -14,7 +14,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     const token = authHeader?.split(' ')[1];
 
     if (!token) {
-      return res.status(401).json({ error: 'Not authorized, no token' });
+      return res.status(401).json({ error: 'Unauthorized, no token' });
     }
 
     // 2. Decode token
@@ -39,6 +39,6 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     next();
   } catch (error) {
     console.error('Authentication error:', error);
-    res.status(401).json({ error: 'Not authorized, token failed' });
+    res.status(401).json({ error: 'Unauthorized, token failed' });
   }
 };

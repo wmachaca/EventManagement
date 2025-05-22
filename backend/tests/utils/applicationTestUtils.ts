@@ -5,7 +5,7 @@ export async function createTestApplication(
   userId: number,
   eventId: number,
   options: {
-    status?: ApplicationStatus;
+    status?: status;
     reviewerId?: number;
   } = {},
 ) {
