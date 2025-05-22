@@ -1,109 +1,237 @@
 import request from 'supertest';
 import app from '../../../src/server';
-import { prisma, cleanDatabase, getAuthToken } from '../../setup';
-import { createTestEventWithApplications } from '../../utils/applicationTestUtils';
+import { prisma, cleanDatabase, createTestUser, userFixtures } from '../../setup';
+import { createTestEvent } from '../../utils/eventTestUtils';
+import { createTestApplication } from '../../utils/applicationTestUtils';
+import { ApplicationStatus } from '@prisma/client';
+import { Event } from '@prisma/client';
 
-describe('Cancel Registration API', () => {
-  let attendeeToken: string;
-  let testData: any;
+describe('DELETE /api/events/:eventId/apply', () => {
+  let organizerToken: string;
+  let pendingAttendeeToken: string;
+  let approvedAttendeeToken: string;
+  let unregisteredToken: string;
+  let organizerId: number;
+  let pendingUserId: number;
+  let approvedUserId: number;
+  let testEvent: Event;
+  let pastEvent: Event;
+
+  // Helper function for login
+  const login = async (email: string): Promise<string> => {
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({ email, password: userFixtures.validLogin.password });
+    return res.body.data.token;
+  };
 
   beforeAll(async () => {
     await cleanDatabase();
-    testData = await createTestEventWithApplications();
-    
-    attendeeToken = await request(app)
-      .post('/api/auth/login')
-      .send({ email: 'attendee1@example.com', password: 'password' })
-      .then(res => res.body.data?.token);
+
+    // Create test users
+    const [organizer, pendingUser, approvedUser, unregisteredUser] = await Promise.all([
+      createTestUser({ name: 'Organizer', email: 'organizer@example.com' }),
+      createTestUser({ name: 'Pending Attendee', email: 'pending@example.com' }),
+      createTestUser({ name: 'Approved Attendee', email: 'approved@example.com' }),
+      createTestUser({ name: 'Unregistered', email: 'unregistered@example.com' }),
+    ]);
+
+    organizerId = organizer.id;
+    pendingUserId = pendingUser.id;
+    approvedUserId = approvedUser.id;
+
+    // Login all users
+    [organizerToken, pendingAttendeeToken, approvedAttendeeToken, unregisteredToken] =
+      await Promise.all([
+        login(organizer.email),
+        login(pendingUser.email),
+        login(approvedUser.email),
+        login(unregisteredUser.email),
+      ]);
+
+    // Create test events
+    testEvent = await createTestEvent(organizerId, {
+      requiresApproval: true,
+      capacity: 10,
+    });
+
+    pastEvent = await createTestEvent(organizerId, {
+      requiresApproval: true,
+      startDate: new Date(Date.now() - 86400000), // Yesterday
+    });
+
+    // Create applications
+    await createTestApplication(pendingUserId, testEvent.id, { status: 'PENDING' });
+    await createTestApplication(approvedUserId, testEvent.id, { status: 'APPROVED' });
+    await createTestApplication(approvedUserId, pastEvent.id, { status: 'APPROVED' });
+
+    // Add approved user to attendees
+    await prisma.event.update({
+      where: { id: testEvent.id },
+      data: {
+        attendees: {
+          connect: { id: approvedUserId },
+        },
+      },
+    });
   });
 
-  afterAll(async () => {
-    await cleanDatabase();
-  });
+  afterAll(cleanDatabase);
 
-  describe('DELETE /api/events/:eventId/apply', () => {
-    it('should allow user to cancel their application', async () => {
-      const response = await request(app)
-        .delete(`/api/events/${testData.event.id}/apply`)
-        .set('Authorization', `Bearer ${attendeeToken}`);
-      
-      expect(response.status).toBe(200);
-      expect(response.body.success).toBe(true);
-      expect(response.body.message).toContain('successfully canceled');
+  describe('Successful cancellations', () => {
+    it('should cancel a pending application', async () => {
+      const res = await request(app)
+        .delete(`/api/events/${testEvent.id}/apply`)
+        .set('Authorization', `Bearer ${pendingAttendeeToken}`);
 
-      // Verify in database
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({
+        success: true,
+        message: 'Your registration has been cancelled',
+      });
+
+      // Verify application was deleted
       const application = await prisma.eventApplication.findFirst({
         where: {
-          eventId: testData.event.id,
-          userId: testData.attendees[0].id
-        }
+          eventId: testEvent.id,
+          userId: pendingUserId,
+        },
       });
       expect(application).toBeNull();
     });
 
-    it('should prevent canceling non-existent applications', async () => {
-      // User who hasn't applied
-      const newUser = await prisma.user.create({
-        data: {
-          name: 'New User',
-          email: 'new@example.com',
-          provider: 'credentials',
-          auth: {
-            create: {
-              password: 'hashedpassword',
-              salt: 'somesalt'
-            }
-          }
-        }
+    it('should cancel an approved registration', async () => {
+      const res = await request(app)
+        .delete(`/api/events/${testEvent.id}/apply`)
+        .set('Authorization', `Bearer ${approvedAttendeeToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({
+        success: true,
+        message: 'Your registration has been cancelled',
       });
-      
-      const newUserToken = await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'new@example.com', password: 'password' })
-        .then(res => res.body.data?.token);
-      
-      const response = await request(app)
-        .delete(`/api/events/${testData.event.id}/apply`)
-        .set('Authorization', `Bearer ${newUserToken}`);
-      
-      expect(response.status).toBe(404);
-      expect(response.body.message).toContain('not found');
+
+      // Verify application was deleted and user removed from attendees
+      const [application, event] = await Promise.all([
+        prisma.eventApplication.findFirst({
+          where: {
+            eventId: testEvent.id,
+            userId: approvedUserId,
+          },
+        }),
+        prisma.event.findUnique({
+          where: { id: testEvent.id },
+          include: { attendees: true },
+        }),
+      ]);
+
+      expect(application).toBeNull();
+      expect(event?.attendees.some(a => a.id === approvedUserId)).toBe(false);
+    });
+  });
+
+  describe('Failure cases', () => {
+    it('should return 401 for unauthenticated requests', async () => {
+      const res = await request(app).delete(`/api/events/${testEvent.id}/apply`);
+
+      expect(res.status).toBe(401);
+      expect(res.body).toEqual({
+        success: false,
+        message: 'Unauthorized',
+      });
     });
 
-    it('should require authentication', async () => {
-      const response = await request(app)
-        .delete(`/api/events/${testData.event.id}/apply`);
-      
-      expect(response.status).toBe(401);
+    it('should return 400 for invalid event ID format', async () => {
+      const res = await request(app)
+        .delete('/api/events/invalid-id/apply')
+        .set('Authorization', `Bearer ${pendingAttendeeToken}`);
+
+      expect(res.status).toBe(400);
+      expect(res.body).toEqual({
+        success: false,
+        message: 'Invalid event ID',
+      });
     });
 
-    it('should prevent canceling after event has started', async () => {
-      // Create past event
-      const pastEvent = await prisma.event.create({
-        data: {
-          name: 'Past Event',
-          startDate: new Date(Date.now() - 86400000), // Yesterday
-          capacity: 10,
-          creatorId: testData.organizer.id,
-          status: 'PUBLISHED'
-        }
-      });
-      
-      // Create application
+    it('should return 404 for non-existent event', async () => {
+      const res = await request(app)
+        .delete('/api/events/999999/apply')
+        .set('Authorization', `Bearer ${pendingAttendeeToken}`);
+
+      expect(res.status).toBe(404);
+      expect(res.body.message).toMatch(/not found/i);
+    });
+
+    it('should return 404 when no registration exists', async () => {
+      const res = await request(app)
+        .delete(`/api/events/${testEvent.id}/apply`)
+        .set('Authorization', `Bearer ${unregisteredToken}`);
+
+      expect(res.status).toBe(404);
+      expect(res.body.message).toMatch(/No active registration found/i);
+    });
+
+    it('should return 403 when event has already started', async () => {
+      const res = await request(app)
+        .delete(`/api/events/${pastEvent.id}/apply`)
+        .set('Authorization', `Bearer ${approvedAttendeeToken}`);
+
+      expect(res.status).toBe(403);
+      expect(res.body.message).toMatch(/already started/i);
+    });
+
+    it('should return 404 for deleted events', async () => {
+      const deletedEvent = await createTestEvent(organizerId, { isDeleted: true });
+
       await prisma.eventApplication.create({
         data: {
-          eventId: pastEvent.id,
-          userId: testData.attendees[0].id,
-          status: 'APPROVED'
-        }
+          eventId: deletedEvent.id,
+          userId: pendingUserId,
+          status: ApplicationStatus.PENDING,
+        },
       });
-      
-      const response = await request(app)
-        .delete(`/api/events/${pastEvent.id}/apply`)
-        .set('Authorization', `Bearer ${attendeeToken}`);
-      
-      expect(response.status).toBe(403);
-      expect(response.body.message).toContain('already started');
+
+      const res = await request(app)
+        .delete(`/api/events/${deletedEvent.id}/apply`)
+        .set('Authorization', `Bearer ${pendingAttendeeToken}`);
+
+      expect(res.status).toBe(404);
+      expect(res.body.message).toMatch(/not found/i);
+    });
+  });
+
+  describe('Edge cases', () => {
+    it('should handle cancellation of rejected applications', async () => {
+      // Create rejected application
+      const rejectedUser = await createTestUser({
+        name: 'Rejected',
+        email: 'rejected@example.com',
+      });
+      const rejectedToken = await login(rejectedUser.email);
+
+      await prisma.eventApplication.create({
+        data: {
+          eventId: testEvent.id,
+          userId: rejectedUser.id,
+          status: ApplicationStatus.REJECTED,
+        },
+      });
+
+      const res = await request(app)
+        .delete(`/api/events/${testEvent.id}/apply`)
+        .set('Authorization', `Bearer ${rejectedToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+    });
+
+    it('should not allow organizer to cancel others registrations', async () => {
+      const res = await request(app)
+        .delete(`/api/events/${testEvent.id}/apply`)
+        .set('Authorization', `Bearer ${organizerToken}`);
+
+      expect(res.status).toBe(404);
+      expect(res.body.message).toMatch(/No active registration found/i);
     });
   });
 });
