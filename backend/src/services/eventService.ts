@@ -144,7 +144,23 @@ export const applyToEvent = async (eventId: number, userId: number) => {
         `You already have a ${event.applications[0].status.toLowerCase()} application`,
       );
     }
-    if (event._count.attendees >= event.capacity) throw new Error('Event is full');
+
+    // 🔥 Count approved applications manually
+    const approvedApplicationsCount = await tx.eventApplication.count({
+      where: {
+        eventId,
+        status: 'APPROVED',
+      },
+    });
+
+    console.log('Capacity check:', {
+      attendees: event._count.attendees,
+      approvedApplications: approvedApplicationsCount,
+      capacity: event.capacity,
+    });
+
+    const totalApproved = event._count.attendees + approvedApplicationsCount;
+    if (totalApproved >= event.capacity) throw new Error('Event has reached maximum capacity');
 
     // 2. Create application (PENDING if requires approval, else APPROVED)
     return tx.eventApplication.create({
@@ -240,14 +256,12 @@ export const checkUserRegistration = async (
           attendees: { some: { id: userId } },
         },
       })) > 0,
-    applicationStatus: application?.status || null,
-    eventDetails: {
-      id: event.id,
-      name: event.name,
-      startDate: event.startDate,
-      capacity: event.capacity,
-      currentAttendees: event._count.attendees,
-    },
+    status: application?.status || null,
+    eventId: event.id,
+    eventName: event.name,
+    startDate: event.startDate,
+    capacity: event.capacity,
+    currentAttendees: event._count.attendees,
   };
 };
 

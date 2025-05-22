@@ -87,7 +87,7 @@ export function generateEventData(
     startDate: futureDate(7),
     capacity: faker.number.int({ min: 10, max: 1000 }),
     isVirtual: false,
-    requiresApproval: false,
+    requiresApproval: true,
     status: 'PUBLISHED',
     creator: { connect: { id: creatorId } },
     ...overrides,

@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import * as eventService from '../../../services/eventService';
-import { UpdateApplicationStatusInput } from '../../../models/event';
+import type { UpdateApplicationStatusInput } from '../../../models/event';
 import { isAuthenticated } from '../../../types/authenticatedRequest';
 
 const prisma = new PrismaClient();
@@ -14,6 +14,7 @@ export const updateApplicationStatus = async (req: Request, res: Response) => {
     const input: UpdateApplicationStatusInput = {
       applicationId: parseInt(req.params.applicationId),
       status: req.body.status,
+      reviewedById: req.body.reviewedById,
     };
 
     const application = await prisma.eventApplication.findUnique({

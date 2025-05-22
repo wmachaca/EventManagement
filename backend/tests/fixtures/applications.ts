@@ -1,4 +1,5 @@
-import { ApplicationStatus, EventApplication } from '@prisma/client';
+import type { EventApplication } from '@prisma/client';
+import { ApplicationStatus } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
 type PartialEventApp = Partial<Omit<EventApplication, 'id'>>;
@@ -8,7 +9,7 @@ export const applicationFixtures = {
     status: ApplicationStatus.PENDING,
     appliedAt: new Date(),
     message: faker.lorem.sentence(5),
-    ...(reviewerId && { reviewedById: reviewerId })
+    ...(reviewerId && { reviewedById: reviewerId }),
   }),
 
   approvedApplication: (reviewerId: number): PartialEventApp => ({
@@ -16,7 +17,7 @@ export const applicationFixtures = {
     appliedAt: faker.date.past(),
     reviewedAt: new Date(),
     reviewedById: reviewerId,
-    message: faker.lorem.sentence(5)
+    message: faker.lorem.sentence(5),
   }),
 
   rejectedApplication: (reviewerId: number): PartialEventApp => ({
@@ -24,8 +25,8 @@ export const applicationFixtures = {
     appliedAt: faker.date.past(),
     reviewedAt: new Date(),
     reviewedById: reviewerId,
-    message: faker.lorem.sentence(5)
-  })
+    message: faker.lorem.sentence(5),
+  }),
 };
 
 /**
@@ -38,17 +39,17 @@ export function generateApplicationData(
     status?: ApplicationStatus;
     reviewerId?: number;
     overrides?: Partial<PartialEventApp>;
-  } = {}
+  } = {},
 ): PartialEventApp {
   const { status = ApplicationStatus.PENDING, reviewerId, overrides = {} } = options;
-  
+
   const base: PartialEventApp = {
     eventId,
     userId,
     status,
     appliedAt: new Date(),
     message: faker.lorem.sentence(),
-    ...overrides
+    ...overrides,
   };
 
   if (status !== ApplicationStatus.PENDING) {
@@ -73,27 +74,30 @@ export function generateBulkApplications(
   options: {
     statusPool?: ApplicationStatus[];
     defaultStatus?: ApplicationStatus;
-  } = {}
+  } = {},
 ): PartialEventApp[] {
   const {
-    statusPool = [ApplicationStatus.PENDING, ApplicationStatus.APPROVED, ApplicationStatus.REJECTED],
-    defaultStatus = ApplicationStatus.PENDING
+    statusPool = [
+      ApplicationStatus.PENDING,
+      ApplicationStatus.APPROVED,
+      ApplicationStatus.REJECTED,
+    ],
+    defaultStatus = ApplicationStatus.PENDING,
   } = options;
 
   return Array.from({ length: count }, () => {
     const userId = faker.helpers.arrayElement(userIds);
     const eventId = faker.helpers.arrayElement(eventIds);
     const status = faker.helpers.arrayElement(statusPool);
-    const reviewerId = status !== ApplicationStatus.PENDING 
-      ? faker.helpers.arrayElement(reviewers) 
-      : undefined;
+    const reviewerId =
+      status !== ApplicationStatus.PENDING ? faker.helpers.arrayElement(reviewers) : undefined;
 
     return generateApplicationData(userId, eventId, {
       status,
       reviewerId,
       overrides: {
-        message: faker.lorem.sentence()
-      }
+        message: faker.lorem.sentence(),
+      },
     });
   });
 }

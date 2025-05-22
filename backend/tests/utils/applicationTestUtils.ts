@@ -2,18 +2,18 @@ import { prisma } from '../setup';
 import { generateApplicationData } from '../fixtures/applications';
 
 export async function createTestApplication(
-  userId: number, 
+  userId: number,
   eventId: number,
   options: {
     status?: ApplicationStatus;
     reviewerId?: number;
-  } = {}
+  } = {},
 ) {
   return prisma.eventApplication.create({
     data: generateApplicationData(userId, eventId, {
       status: options.status,
-      reviewerId: options.reviewerId
-    })
+      reviewerId: options.reviewerId,
+    }),
   });
 }
 
@@ -27,10 +27,10 @@ export async function createTestEventWithApplications() {
       auth: {
         create: {
           password: 'hashedpassword',
-          salt: 'somesalt'
-        }
-      }
-    }
+          salt: 'somesalt',
+        },
+      },
+    },
   });
 
   // Create attendees
@@ -43,10 +43,10 @@ export async function createTestEventWithApplications() {
         auth: {
           create: {
             password: 'hashedpassword',
-            salt: 'somesalt'
-          }
-        }
-      }
+            salt: 'somesalt',
+          },
+        },
+      },
     }),
     prisma.user.create({
       data: {
@@ -56,10 +56,10 @@ export async function createTestEventWithApplications() {
         auth: {
           create: {
             password: 'hashedpassword',
-            salt: 'somesalt'
-          }
-        }
-      }
+            salt: 'somesalt',
+          },
+        },
+      },
     }),
     prisma.user.create({
       data: {
@@ -69,11 +69,11 @@ export async function createTestEventWithApplications() {
         auth: {
           create: {
             password: 'hashedpassword',
-            salt: 'somesalt'
-          }
-        }
-      }
-    })
+            salt: 'somesalt',
+          },
+        },
+      },
+    }),
   ]);
 
   // Create test event
@@ -84,29 +84,29 @@ export async function createTestEventWithApplications() {
       capacity: 3,
       requiresApproval: true,
       creatorId: organizer.id,
-      status: 'PUBLISHED'
-    }
+      status: 'PUBLISHED',
+    },
   });
 
   // Create test applications with proper reviewer relationships
   const [pendingApp, approvedApp, rejectedApp] = await Promise.all([
-    createTestApplication(attendee1.id, event.id, { 
-      status: 'PENDING' 
+    createTestApplication(attendee1.id, event.id, {
+      status: 'PENDING',
     }),
-    createTestApplication(attendee2.id, event.id, { 
+    createTestApplication(attendee2.id, event.id, {
       status: 'APPROVED',
-      reviewerId: organizer.id
+      reviewerId: organizer.id,
     }),
-    createTestApplication(attendee3.id, event.id, { 
+    createTestApplication(attendee3.id, event.id, {
       status: 'REJECTED',
-      reviewerId: organizer.id
-    })
+      reviewerId: organizer.id,
+    }),
   ]);
 
   return {
     organizer,
     attendees: [attendee1, attendee2, attendee3],
     event,
-    applications: [pendingApp, approvedApp, rejectedApp]
+    applications: [pendingApp, approvedApp, rejectedApp],
   };
 }
