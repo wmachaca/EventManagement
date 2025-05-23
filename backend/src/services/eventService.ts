@@ -1,6 +1,7 @@
 import type { ApplicationStatus } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 import type { CreateEventInput, UpdateEventInput, ApplicationDetails } from '../models/event';
+import { ApplicationError } from '../errors/ApplicationError';
 
 const prisma = new PrismaClient();
 
@@ -159,7 +160,7 @@ export const applyToEvent = async (eventId: number, userId: number) => {
       capacity: event.capacity,
     });
 
-    const totalApproved = event._count.attendees + approvedApplicationsCount;
+    const totalApproved = event._count.attendees + approvedApplicationsCount; //think more about this
     if (totalApproved >= event.capacity) throw new Error('Event has reached maximum capacity');
 
     // 2. Create application (PENDING if requires approval, else APPROVED)
@@ -185,13 +186,13 @@ export const cancelRegistration = async (eventId: number, userId: number) => {
     });
 
     if (!event) {
-      throw new Error('Event not found or has been deleted');
+      throw new ApplicationError('Event not found or has been deleted', 404);
     }
 
     // 2. Check if cancellation is allowed (based on event start date)
     const now = new Date();
     if (event.startDate <= now) {
-      throw new Error('Cannot cancel registration after event has started');
+      throw new ApplicationError('Cannot cancel registration after event has started', 403);
     }
 
     // 3. Delete application and remove from attendees if approved
@@ -214,7 +215,7 @@ export const cancelRegistration = async (eventId: number, userId: number) => {
     ]);
 
     if (application.count === 0) {
-      throw new Error('No active registration found to cancel');
+      throw new ApplicationError('No active registration found to cancel', 404);
     }
 
     return true;

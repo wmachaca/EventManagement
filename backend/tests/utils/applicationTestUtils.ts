@@ -21,7 +21,6 @@ export async function createTestApplication(
       userId: data.userId,
       status: data.status,
       appliedAt: data.appliedAt,
-      message: data.message,
       reviewedAt: data.reviewedAt,
       reviewedById: data.reviewedById,
     },
