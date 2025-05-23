@@ -273,12 +273,14 @@ export const updateApplicationStatus = async (applicationId: number, status: App
   });
 };
 
-export const getEventApplications = async (eventId: number) => {
+export const getEventApplications = async (eventId: number, take?: number, skip?: number) => {
   return prisma.eventApplication.findMany({
     where: { eventId },
     include: {
       user: true,
     },
+    take,
+    skip,
   });
 };
 

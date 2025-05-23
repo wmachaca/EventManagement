@@ -8,6 +8,7 @@ export async function createTestApplication(
   options: {
     status?: ApplicationStatus;
     reviewerId?: number;
+    appliedAt?: Date;
   } = {},
 ) {
   const data = generateApplicationData(userId, eventId, {
