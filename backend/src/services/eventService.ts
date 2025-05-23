@@ -266,10 +266,18 @@ export const checkUserRegistration = async (
   };
 };
 
-export const updateApplicationStatus = async (applicationId: number, status: ApplicationStatus) => {
+export const updateApplicationStatus = async (
+  applicationId: number,
+  status: ApplicationStatus,
+  reviewedById: number,
+) => {
   return prisma.eventApplication.update({
     where: { id: applicationId },
-    data: { status },
+    data: {
+      status,
+      reviewedById,
+      reviewedAt: new Date(),
+    },
   });
 };
 

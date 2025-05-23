@@ -40,7 +40,7 @@ export interface EventApplicationInput {
 export interface UpdateApplicationStatusInput {
   applicationId: number;
   status: ApplicationStatus;
-  reviewedById: number;
+  //reviewedById: number;//owner
 }
 
 export type EventWithApplications = Event & {
