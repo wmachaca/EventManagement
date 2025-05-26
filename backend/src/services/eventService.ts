@@ -34,10 +34,23 @@ export const createEvent = async (input: CreateEventInput) => {
 };
 
 export const updateEvent = async (id: number, input: UpdateEventInput) => {
-  return prisma.event.update({
-    where: { id },
-    data: input,
-  });
+  const { version, ...data } = input;
+
+  try {
+    // Perform optimistic concurrency control
+    return await prisma.event.update({
+      where: {
+        id,
+        version, // Ensure no one else updated it since last read
+      },
+      data: {
+        ...data,
+        version: { increment: 1 },
+      },
+    });
+  } catch (error) {
+    throw new Error('Event was modified concurrently. Please reload and try again.');
+  }
 };
 
 export const getEventById = async (id: number, includeDeleted = false) => {
@@ -86,15 +99,23 @@ export const deleteEvent = async (eventId: number, creatorId: number) => {
     throw new Error('Event not found or unauthorized');
   }
 
-  // Perform soft delete
-  return prisma.event.update({
-    where: { id: eventId },
-    data: {
-      isDeleted: true,
-      deletedAt: new Date(),
-      status: 'CANCELED', // Optionally cancel the event when deleting
-    },
-  });
+  // Perform soft delete with version check
+  try {
+    return await prisma.event.update({
+      where: {
+        id: eventId,
+        version: existingEvent.version, // Ensure no concurrent modifications
+      },
+      data: {
+        isDeleted: true,
+        deletedAt: new Date(),
+        status: 'CANCELED',
+        version: existingEvent.version + 1, // Increment version
+      },
+    });
+  } catch (error) {
+    throw new Error('Event was modified concurrently. Please refresh and try again.');
+  }
 };
 
 export const restoreEvent = async (eventId: number, creatorId: number) => {
@@ -107,20 +128,33 @@ export const restoreEvent = async (eventId: number, creatorId: number) => {
     throw new Error('Event not found or unauthorized');
   }
 
-  // Restore the soft-deleted event
-  return prisma.event.update({
-    where: { id: eventId },
-    data: {
-      isDeleted: false,
-      deletedAt: null,
-      status: 'DRAFT', // Or whatever status makes sense for your app
-    },
-  });
+  // Ensure the event is actually soft-deleted before restoring
+  if (!existingEvent.isDeleted) {
+    throw new Error('Event is not deleted and cannot be restored');
+  }
+
+  // Restore the event with version check
+  try {
+    return await prisma.event.update({
+      where: {
+        id: eventId,
+        version: existingEvent.version, // Ensure no concurrent modifications
+      },
+      data: {
+        isDeleted: false,
+        deletedAt: null,
+        status: 'DRAFT', // Or another status
+        version: existingEvent.version + 1, // Increment version
+      },
+    });
+  } catch (error) {
+    throw new Error('Event was modified concurrently. Please refresh and try again.');
+  }
 };
 
 export const applyToEvent = async (eventId: number, userId: number) => {
   return await prisma.$transaction(async tx => {
-    // 1. Fetch event (include requiresApproval)
+    // 1. First, fetch the event WITH its current version
     const event = await tx.event.findUnique({
       where: { id: eventId, isDeleted: false },
       select: {
@@ -128,6 +162,7 @@ export const applyToEvent = async (eventId: number, userId: number) => {
         status: true,
         capacity: true,
         requiresApproval: true,
+        version: true, // Include version in the selection
         applications: {
           where: { userId },
           select: { status: true },
@@ -146,7 +181,7 @@ export const applyToEvent = async (eventId: number, userId: number) => {
       );
     }
 
-    // 🔥 Count approved applications manually
+    // Count approved applications
     const approvedApplicationsCount = await tx.eventApplication.count({
       where: {
         eventId,
@@ -154,27 +189,35 @@ export const applyToEvent = async (eventId: number, userId: number) => {
       },
     });
 
-    console.log('Capacity check:', {
-      attendees: event._count.attendees,
-      approvedApplications: approvedApplicationsCount,
-      capacity: event.capacity,
-    });
-
-    const totalApproved = event._count.attendees + approvedApplicationsCount; //think more about this
+    const totalApproved = event._count.attendees + approvedApplicationsCount;
     if (totalApproved >= event.capacity) throw new Error('Event has reached maximum capacity');
 
-    // 2. Create application (PENDING if requires approval, else APPROVED)
-    return tx.eventApplication.create({
-      data: {
-        eventId,
-        userId,
-        status: event.requiresApproval ? 'PENDING' : 'APPROVED', // 👈 Dynamic status
-      },
-      include: {
-        event: { select: { name: true, startDate: true } },
-        user: { select: { name: true, email: true } },
-      },
-    });
+    // 2. Create application with version check
+    try {
+      const application = await tx.eventApplication.create({
+        data: {
+          eventId,
+          userId,
+          status: event.requiresApproval ? 'PENDING' : 'APPROVED',
+        },
+        include: {
+          event: { select: { name: true, startDate: true } },
+          user: { select: { name: true, email: true } },
+        },
+      });
+
+      // 3. Increment the event version atomically
+      // This ensures no other updates happened since we read the event
+      await tx.event.update({
+        where: { id: eventId, version: event.version },
+        data: { version: event.version + 1 },
+      });
+
+      return application;
+    } catch (error) {
+      // This will catch if the version check fails
+      throw new Error('Event was modified concurrently. Please try again.');
+    }
   });
 };
 

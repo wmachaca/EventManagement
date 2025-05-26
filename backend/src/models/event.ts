@@ -30,6 +30,7 @@ export interface UpdateEventInput {
   contactEmail?: string;
   status?: EventStatus;
   requiresApproval?: boolean;
+  version: number;
 }
 
 export interface EventApplicationInput {
