@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { verifyPassword } from '../../../utils/password';
 import { prisma } from '../../../database/client';
@@ -17,6 +17,17 @@ if (!JWT_SECRET) {
 export const loginUser = async (req: Request<{}, {}, LoginBody>, res: Response) => {
   const { email, password } = req.body;
 
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: 'Email and password are required',
+      errors: [
+        ...(email ? [] : [{ field: 'email', message: 'Email is required' }]),
+        ...(password ? [] : [{ field: 'password', message: 'Password is required' }]),
+      ],
+    });
+  }
+
   try {
     const user = await prisma.user.findUnique({
       where: { email },
@@ -25,11 +36,19 @@ export const loginUser = async (req: Request<{}, {}, LoginBody>, res: Response) 
 
     // Check if user exists and has auth record with password
     if (!user?.auth?.password) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials',
+      });
     }
 
     const isValid = await verifyPassword(password, user.auth.password);
-    if (!isValid) return res.status(400).json({ message: 'Invalid credentials' });
+    if (!isValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials',
+      });
+    }
 
     const token = jwt.sign(
       {
@@ -41,10 +60,17 @@ export const loginUser = async (req: Request<{}, {}, LoginBody>, res: Response) 
       JWT_SECRET,
     );
 
-    res.json({ token, user: sanitizeUser(user) });
+    return res.status(200).json({
+      success: true,
+      data: {
+        token,
+        user: sanitizeUser(user),
+      },
+    });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({
+    return res.status(500).json({
+      success: false,
       message: 'Server error',
       error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
     });

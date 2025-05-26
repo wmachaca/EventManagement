@@ -2,7 +2,8 @@
 import NextAuth, { type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
-import axios, { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
+import axios from 'axios';
 
 // Environment validation
 if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
@@ -45,12 +46,15 @@ export const authOptions: NextAuthOptions = {
             password: credentials.password,
           });
 
-          if (res.data.token) {
+          //console.log('Login response:', res.data);
+          const { token, user } = res.data.data;
+
+          if (token && user) {
             return {
-              id: res.data.userId,
-              email: res.data.user.email,
-              name: res.data.user.name,
-              token: res.data.token,
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              token: token,
             };
           }
           return null;

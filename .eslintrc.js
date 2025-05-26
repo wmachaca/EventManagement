@@ -10,7 +10,11 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
-    project: ['./frontend/tsconfig.json', './backend/tsconfig.json'],
+    project: [
+      './frontend/tsconfig.json',
+      './backend/tsconfig.json',
+      './backend/tsconfig.test.json',
+    ],
     tsconfigRootDir: __dirname,
     ecmaFeatures: {
       jsx: true,

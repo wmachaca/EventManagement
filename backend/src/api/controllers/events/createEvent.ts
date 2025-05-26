@@ -5,8 +5,8 @@ import { isAuthenticated } from '../../../types/authenticatedRequest';
 
 export const createEvent = async (req: Request, res: Response) => {
   try {
-    console.log('Request headers:', req.headers);
-    console.log('Request body:', req.body);
+    //console.log('Request headers:', req.headers);
+    //console.log('Request body:', req.body);
     console.log('Request user:', req.user);
     if (!isAuthenticated(req)) {
       return res.status(401).json({ message: 'Unauthorized' });
