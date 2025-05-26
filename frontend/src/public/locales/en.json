@@ -60,6 +60,17 @@
     "editTitle": "Edit Event",
     "updateSuccess": "Event updated successfully",
     "updateError": "Failed to update event",
-    "authError": "Authentication required"
+    "processing": "Processing...",
+    "pendingApproval": "Pending Approval",
+    "registered": "Registered (Cancel)",
+    "rejected": "Application Rejected",
+    "registerNow": "Register Now",
+    "pendingApprovalNote": "Your registration is pending approval by the organizer.",
+    "rejectedNote": "Your registration was not approved for this event.",
+    "eventFull": "This event has reached maximum capacity.",
+    "eventNotPublished": "This event is not currently accepting registrations.",
+    "authError": "Authentication required",
+    "publish": "Publish",
+    "cancelEvent": "Cancel event"
   }
 }

@@ -189,8 +189,9 @@ export const applyToEvent = async (eventId: number, userId: number) => {
       },
     });
 
-    const totalApproved = event._count.attendees + approvedApplicationsCount;
-    if (totalApproved >= event.capacity) throw new Error('Event has reached maximum capacity');
+    if (approvedApplicationsCount >= event.capacity) {
+      throw new Error('Event has reached maximum capacity');
+    }
 
     // 2. Create application with version check
     try {

@@ -1,13 +1,13 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import * as eventService from '../../../services/eventService';
-import { UpdateEventInput } from '../../../models/event';
+import type { UpdateEventInput } from '../../../models/event';
 import { isAuthenticated } from '../../../types/authenticatedRequest';
 
 export const updateEvent = async (req: Request, res: Response) => {
   try {
     console.log('Request user:', req.user);
     console.log('Request body:', req.body);
-    console.log('Uploaded file:', req.file);   
+    console.log('Uploaded file:', req.file);
     if (!isAuthenticated(req)) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
@@ -22,14 +22,19 @@ export const updateEvent = async (req: Request, res: Response) => {
     if (req.file) {
       const filename = req.file.filename;
       imageUrl = `/images/${filename}`; // Same path structure as create
-    }    
+    }
     // Prepare update input - merge existing data with updates
+
+    if (req.body.version && isNaN(Number(req.body.version))) {
+      return res.status(400).json({ message: 'Invalid version number' });
+    }
 
     const input: UpdateEventInput = {
       ...req.body,
       // Only update imageUrl if a new file was uploaded
-      imageUrl: imageUrl || existingEvent.imageUrl
-    };    
+      version: req.body.version ? Number(req.body.version) : undefined,
+      imageUrl: imageUrl || existingEvent.imageUrl,
+    };
 
     console.log('Updating event with:', input);
     const updatedEvent = await eventService.updateEvent(id, input);
