@@ -129,28 +129,63 @@ describe('POST /api/events/:eventId/apply', () => {
     const res = await applyToEvent(deletedEvent.id, attendee1Token);
     expect(res.status).toBe(404);
   });
-  /*
-    it('should handle concurrent applications correctly', async () => {
-      const limitedEvent = await createTestEvent(organizer.id, {
-        capacity: 1,
-        requiresApproval: false
-      });
 
-      // Simulate concurrent requests
-      const [response1, response2] = await Promise.all([
-        applyToEvent(limitedEvent.id, attendeeToken),
-        applyToEvent(limitedEvent.id, reviewerToken)
-      ]);
-
-      // Only one should succeed
-      expect([response1.status, response2.status]).toContain(201);
-      expect([response1.status, response2.status]).toContain(403);
-
-      // Verify only one application was created
-      const applications = await prisma.eventApplication.findMany({
-        where: { eventId: limitedEvent.id }
-      });
-      expect(applications.length).toBe(1);
+  it('should handle concurrent applications correctly', async () => {
+    const limitedEvent = await createTestEvent(ownerId, {
+      capacity: 1,
+      requiresApproval: false,
     });
-  });*/
+
+    // Get initial version
+    const initialEvent = await prisma.event.findUnique({
+      where: { id: limitedEvent.id },
+    });
+
+    if (!initialEvent) {
+      throw new Error('Initial event not found');
+    }
+
+    // Simulate concurrent requests
+    const [response1, response2] = await Promise.all([
+      applyToEvent(limitedEvent.id, attendee1Token),
+      applyToEvent(limitedEvent.id, attendee2Token),
+    ]);
+
+    // Only one should succeed
+    expect([response1.status, response2.status]).toContain(201);
+    expect([response1.status, response2.status]).toContain(403);
+
+    // Verify only one application was created
+    const applications = await prisma.eventApplication.findMany({
+      where: { eventId: limitedEvent.id },
+    });
+    expect(applications.length).toBe(1);
+
+    // Verify version was incremented
+    const updatedEvent = await prisma.event.findUnique({
+      where: { id: limitedEvent.id },
+    });
+
+    if (!updatedEvent) {
+      throw new Error('Updated event not found');
+    }
+    expect(updatedEvent.version).toBe(initialEvent.version + 1);
+  });
+
+  it('should increment version number on successful application', async () => {
+    const event = await createTestEvent(ownerId);
+    const initialVersion = event.version;
+
+    await applyToEvent(event.id, attendee1Token);
+
+    const updatedEvent = await prisma.event.findUnique({
+      where: { id: event.id },
+    });
+
+    if (!updatedEvent) {
+      throw new Error('Event not found');
+    }
+
+    expect(updatedEvent.version).toBe(initialVersion + 1);
+  });
 });
