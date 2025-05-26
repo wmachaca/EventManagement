@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./frontend:/app:delegated
+      - /app/node_modules # prevent overwriting node_modules
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped

@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+/prisma/.env
+
+# Logs & runtime
+*.log
+*.pid
+
+# Build outputs
+dist/
+build/
+
+# Prisma
+
+# Editors
+
+# OS files
+.DS_Store
+
+# IDE (JetBrains)
+.idea/
+# Public files
+public/

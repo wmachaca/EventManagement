@@ -1,0 +1,98 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int                @id @default(autoincrement())
+  name            String
+  email           String             @unique
+  provider        String             @default("credentials") // "credentials" or "google"
+  googleId        String?            @unique
+  createdEvents   Event[]            @relation("CreatedEvents")
+  attendingEvents Event[]            @relation("EventAttendees")
+  applications    EventApplication[] @relation(name: "ApplicationUser")
+  reviewedApplications EventApplication[] @relation(name: "ApplicationReviewer")  
+  auth            UserAuth?          @relation(fields: [authId], references: [id])
+  authId          Int?               @unique
+  createdAt       DateTime           @default(now())
+}
+
+model UserAuth {
+  id               Int       @id @default(autoincrement())
+  user             User?
+  password         String? // Nullable for OAuth users
+  salt             String?
+  resetToken       String? // For password reset flows
+  resetTokenExpiry DateTime?
+}
+
+model Event {
+  id           Int                @id @default(autoincrement())
+  name         String
+  description  String?
+  imageUrl     String?       
+  location     String?
+  startDate    DateTime           
+  endDate      DateTime?          // Optional end date for multi-day events
+  capacity     Int
+  virtualLink  String?            // For virtual events (Zoom/Teams link)  
+  isVirtual    Boolean            @default(false)
+  requiresApproval Boolean          @default(false) 
+  creatorId    Int
+  creator      User               @relation("CreatedEvents", fields: [creatorId], references: [id])
+  attendees    User[]             @relation("EventAttendees")
+  sponsors     Sponsor[]          @relation("EventSponsors") 
+  contactEmail String?              
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  version      Int                @default(1) // For optimistic concurrency control
+  status       EventStatus        @default(DRAFT)
+  applications EventApplication[]
+  isDeleted    Boolean            @default(false) // Soft delete
+  deletedAt    DateTime? // Timestamp for soft delete
+
+  @@unique([id, creatorId], name: "id_creatorId") // Compound key (optional but recommended for some queries)
+}
+
+model Sponsor {
+  id          Int     @id @default(autoincrement())
+  name        String
+  logoUrl     String?
+  website     String?
+  events      Event[] @relation("EventSponsors")
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELED
+}
+
+model EventApplication {
+  id        Int               @id @default(autoincrement())
+  eventId   Int
+  event     Event             @relation(fields: [eventId], references: [id])
+  userId    Int
+  user      User              @relation(name: "ApplicationUser", fields: [userId], references: [id])
+  status    ApplicationStatus @default(PENDING)
+  appliedAt DateTime          @default(now())
+  reviewedAt DateTime?        // when status was changed
+  reviewedById Int?           // who changed the status
+  reviewedBy User?            @relation(name: "ApplicationReviewer",fields: [reviewedById], references: [id])
+
+  @@unique([eventId, userId])
+  @@index([status])
+  @@index([userId])  
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
