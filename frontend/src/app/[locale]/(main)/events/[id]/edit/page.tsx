@@ -102,7 +102,7 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
 
       toast.success(t('updateSuccess'), { id: toastId });
       await fetchEvent();
-      //router.push(`/${locale}/events/${params.id}`);
+      router.push(`/${locale}/events/${params.id}`);
     } catch (error) {
       console.error('Error updating event:', error);
       if (axios.isAxiosError(error)) {

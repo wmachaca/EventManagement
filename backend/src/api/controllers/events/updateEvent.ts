@@ -43,6 +43,7 @@ export const updateEvent = async (req: Request, res: Response) => {
     }
 
     // Prepare update input - merge existing data with updates
+
     const input: UpdateEventInput = {
       ...req.body,
       version: requestVersion,
