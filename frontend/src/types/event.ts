@@ -2,6 +2,11 @@
 export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELED';
 export type ApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
+export interface RegistrationStatus {
+  isRegistered: boolean;
+  status: ApplicationStatus | null;
+}
+
 // Basic user type (shared across app — consider moving to src/types/user.ts)
 export interface BasicUser {
   id: number;
