@@ -2,6 +2,7 @@ import type { ApplicationStatus } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 import type { CreateEventInput, UpdateEventInput, ApplicationDetails } from '../models/event';
 import { ApplicationError } from '../errors/ApplicationError';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 const prisma = new PrismaClient();
 
@@ -48,8 +49,13 @@ export const updateEvent = async (id: number, input: UpdateEventInput) => {
         version: { increment: 1 },
       },
     });
-  } catch (error) {
-    throw new Error('Event was modified concurrently. Please reload and try again.');
+  } catch (error: any) {
+    if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
+      const err = new Error('Event was modified concurrently.');
+      (err as any).statusCode = 409; // Custom status for concurrency issue
+      throw err;
+    }
+    throw new Error(error.message || 'Error updating event.');
   }
 };
 
