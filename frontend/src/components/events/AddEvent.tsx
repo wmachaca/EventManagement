@@ -79,7 +79,16 @@ export default function AddEvent({
     formData.append('description', description || '');
     formData.append('isVirtual', isVirtual.toString());
     formData.append('location', isVirtual ? '' : location || '');
-    formData.append('virtualLink', isVirtual ? virtualLink || '' : '');
+    if (isVirtual && virtualLink.trim()) {
+      try {
+        console.log('This is the virtual link: ', isVirtual, virtualLink);
+        new URL(virtualLink); // ensure it's a valid URL
+        formData.append('virtualLink', virtualLink);
+      } catch {
+        setSubmissionError('Please enter a valid URL for the virtual link.');
+        return;
+      }
+    }
     formData.append('endDate', endDate ? new Date(endDate).toISOString() : '');
     formData.append('contactEmail', contactEmail || '');
 
@@ -93,9 +102,10 @@ export default function AddEvent({
     for (const [key, value] of formData.entries()) {
       console.log(key, value);
     }
+    console.log('Current version:', currentEvent?.version);
     // Include version if in edit mode
-    if (isEditMode && currentEvent?.version) {
-      formData.append('version', String(Number(currentEvent.version)));
+    if (isEditMode && currentEvent?.version !== undefined) {
+      formData.append('version', currentEvent.version.toString());
     }
 
     await onSubmit(formData);
