@@ -56,7 +56,9 @@ export const applyToEvent = async (req: Request, res: Response) => {
         ? statusMap[message]
         : message.includes('already') || message.includes('application')
           ? 409
-          : 500;
+          : message.includes('modified concurrently')
+            ? 403
+            : 500;
 
     return res.status(status).json({
       success: false,

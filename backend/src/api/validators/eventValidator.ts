@@ -53,6 +53,12 @@ export const createEventValidator = [
     .isBoolean()
     .withMessage('isVirtual must be a boolean')
     .toBoolean(),
+  body('requiresApproval')
+    .notEmpty()
+    .withMessage('requiresApproval flag is required')
+    .isBoolean()
+    .withMessage('requiresApproval must be a boolean')
+    .toBoolean(),
 
   // Conditional and optional fields
   body('description')
@@ -163,6 +169,11 @@ export const updateEventValidator = [
       }
       return true;
     }),
+  body('requiresApproval')
+    .optional()
+    .isBoolean()
+    .withMessage('requiresApproval must be a boolean')
+    .toBoolean(), // Add this line
 
   // Optional fields with same validation as create
   body('description')
