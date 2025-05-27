@@ -17,6 +17,11 @@ import {
   UserIcon,
 } from '@heroicons/react/24/outline';
 
+interface RegistrationStatus {
+  isRegistered: boolean;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | null;
+}
+
 export default function EventDetailsPage({ params }: { params: { id: string } }) {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -26,6 +31,10 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
   const [error, setError] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
+  const [registration, setRegistration] = useState<RegistrationStatus>({
+    isRegistered: false,
+    status: null,
+  });
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -60,7 +69,6 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
   };
 
   const checkRegistration = async () => {
-    console.error('I am inside checkregistration:');
     try {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.id}/registration`,
@@ -70,23 +78,31 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
           },
         },
       );
-      setIsRegistered(response.data.isRegistered);
+      setRegistration(response.data.data); // Match the backend response structure
     } catch (err) {
       console.error('Error checking registration:', err);
+      setRegistration({
+        isRegistered: false,
+        status: null,
+      });
     }
   };
 
   const handleRegistration = async () => {
     setIsRegistering(true);
     try {
-      if (isRegistered) {
+      if (registration.isRegistered) {
         await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.id}/apply`, {
           headers: {
             Authorization: `Bearer ${session?.accessToken}`,
           },
         });
+        setRegistration({
+          isRegistered: false,
+          status: null,
+        });
       } else {
-        await axios.post(
+        const response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.id}/apply`,
           {},
           {
@@ -95,12 +111,20 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
             },
           },
         );
+
+        // For immediate approval events, status will be APPROVED
+        // For events requiring approval, status will be PENDING
+        setRegistration({
+          isRegistered: true,
+          status: response.data.data.status,
+        });
+
+        // Refresh event data to update attendee count
+        await fetchEvent();
       }
-      setIsRegistered(!isRegistered);
     } catch (err) {
       console.error(err);
       setError(t('registrationError') || 'Failed to process registration');
-      await checkRegistration();
     } finally {
       setIsRegistering(false);
     }
@@ -127,7 +151,25 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
   if (status === 'loading' || isLoading) {
     return (
       <div className="flex justify-center items-center h-[calc(100vh-200px)]">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-400 border-t-transparent" />
+        <div className="w-full max-w-7xl mx-auto p-4">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 w-24 bg-gray-200 rounded"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="md:col-span-2 space-y-6">
+                <div className="h-64 bg-gray-200 rounded"></div>
+                <div className="space-y-4">
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                </div>
+              </div>
+              <div className="space-y-6">
+                <div className="h-32 bg-gray-200 rounded"></div>
+                <div className="h-24 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -153,6 +195,33 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const getRegistrationButtonText = () => {
+    if (isRegistering) return t('processing') || 'Processing...';
+
+    if (registration.isRegistered) {
+      switch (registration.status) {
+        case 'PENDING':
+          return t('pendingApproval') || 'Pending Approval';
+        case 'APPROVED':
+          return t('registered') || 'Registered (Cancel)';
+        case 'REJECTED':
+          return t('rejected') || 'Application Rejected';
+        default:
+          return t('registered') || 'Registered (Cancel)';
+      }
+    }
+    return t('registerNow') || 'Register Now';
+  };
+
+  const isRegistrationDisabled = () => {
+    return (
+      isRegistering ||
+      (registration.isRegistered && registration.status === 'REJECTED') ||
+      event.status !== 'PUBLISHED' ||
+      (event.capacity && event.attendees?.length >= event.capacity)
+    );
   };
 
   return (
@@ -309,8 +378,28 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
                     <div>
                       <p className="font-medium text-gray-800">Capacity</p>
                       <p className="text-gray-600">
-                        {event.capacity} attendees
-                        {event.attendees && ` (${event.attendees.length} registered)`}
+                        {event.capacity ? (
+                          <>
+                            {event.attendees?.length || 0} of {event.capacity} spots filled
+                            {event.attendees && event.capacity && (
+                              <span className="block w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                                <span
+                                  className="block bg-blue-600 h-2.5 rounded-full"
+                                  style={{
+                                    width: `${Math.min(
+                                      100,
+                                      Math.round(
+                                        ((event.attendees.length || 0) / event.capacity) * 100,
+                                      ),
+                                    )}%`,
+                                  }}
+                                ></span>
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          'Unlimited capacity'
+                        )}
                       </p>
                     </div>
                   </div>
@@ -329,23 +418,51 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
                 </p>
 
                 {event.creatorId !== parseInt(session?.user?.id || '0') && (
-                  <button
-                    onClick={handleRegistration}
-                    disabled={isRegistering}
-                    className={`w-full py-2 rounded-lg text-white font-medium ${
-                      isRegistered
-                        ? 'bg-gray-600 hover:bg-gray-700'
-                        : 'bg-blue-600 hover:bg-blue-700'
-                    }`}
-                  >
-                    {isRegistering ? (
-                      <span>Processing...</span>
-                    ) : isRegistered ? (
-                      <span>Cancel Registration</span>
-                    ) : (
-                      <span>Register Now</span>
+                  <div className="space-y-2">
+                    <button
+                      onClick={handleRegistration}
+                      disabled={isRegistrationDisabled()}
+                      className={`w-full py-2 rounded-lg text-white font-medium ${
+                        registration.isRegistered
+                          ? registration.status === 'APPROVED'
+                            ? 'bg-green-600 hover:bg-green-700'
+                            : registration.status === 'PENDING'
+                              ? 'bg-yellow-600 hover:bg-yellow-700'
+                              : 'bg-gray-600 hover:bg-gray-700'
+                          : 'bg-blue-600 hover:bg-blue-700'
+                      } ${isRegistrationDisabled() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {getRegistrationButtonText()}
+                    </button>
+
+                    {registration.status === 'PENDING' && (
+                      <p className="text-sm text-yellow-600">
+                        {t('pendingApprovalNote') ||
+                          'Your registration is pending approval by the organizer.'}
+                      </p>
                     )}
-                  </button>
+
+                    {registration.status === 'REJECTED' && (
+                      <p className="text-sm text-red-600">
+                        {t('rejectedNote') || 'Your registration was not approved for this event.'}
+                      </p>
+                    )}
+
+                    {event.capacity &&
+                      event.attendees?.length >= event.capacity &&
+                      !registration.isRegistered && (
+                        <p className="text-sm text-red-600">
+                          {t('eventFull') || 'This event has reached maximum capacity.'}
+                        </p>
+                      )}
+
+                    {event.status !== 'PUBLISHED' && (
+                      <p className="text-sm text-red-600">
+                        {t('eventNotPublished') ||
+                          'This event is not currently accepting registrations.'}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
 
