@@ -45,6 +45,7 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
   const fetchEvent = async () => {
     try {
       const eventData = await fetchEventDetails(params.id, session);
+      console.log("Event requires approval:", eventData);
       setEvent(eventData);
       setIsLoading(false);
     } catch (err) {

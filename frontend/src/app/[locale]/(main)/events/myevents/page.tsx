@@ -161,7 +161,7 @@ export default function MyEventsPage() {
         <div className="bg-white p-6 rounded-xl shadow-md">
           <div className="mb-6 flex justify-between items-center">
             <h1 className="text-3xl font-bold text-gray-800">
-              {showDeleted ? t('deletedEvents') : t('myEvents')}
+              {showDeleted ? t('deletedEvents') : null}
             </h1>
             <button
               onClick={handleToggleDeletedView}

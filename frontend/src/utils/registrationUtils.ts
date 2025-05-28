@@ -47,6 +47,7 @@ export const handleRegistration = async (
 ) => {
   setIsRegistering(true);
   try {
+
     if (registration.isRegistered) {
       await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/events/${eventId}/apply`, {
         headers: {

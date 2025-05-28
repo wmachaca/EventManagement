@@ -14,7 +14,7 @@ interface EventListProps {
 export default function EventList({
   events,
   deleteEvent,
-  //currentUserId,
+  currentUserId,
   updateEvent,
   isDeletedView = false,
   restoreEvent,
@@ -41,10 +41,6 @@ export default function EventList({
   return (
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h2 className="text-xl font-semibold text-gray-800">
-          {isDeletedView ? 'Deleted Events' : 'Your Events'}
-        </h2>
-
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <div className="flex items-center gap-3">
             <label htmlFor="status-filter" className="text-sm text-gray-600 whitespace-nowrap">
@@ -94,6 +90,7 @@ export default function EventList({
           updateEvent={updateEvent}
           isDeletedView={isDeletedView}
           restoreEvent={restoreEvent}
+          currentUserId={currentUserId}          
         />
       )}
     </div>
