@@ -33,6 +33,7 @@ export default function EventRow({
 
   const canEdit = currentUserId === event.creatorId;
   const canDelete = canEdit;
+  const canViewRegistration = canEdit;
 
   const handleDelete = () => {
     setIsDeleting(true);
@@ -60,7 +61,6 @@ export default function EventRow({
   // Count approved attendees
   //  const approvedCount = applications.filter(app => app.status === 'APPROVED').length;
   //  console.log('Event row data:', event);
-  //  console.log('From backend', event._count.applications);
   const approvedAttendeesCount = event._count.applications;
 
   const formatDate = (date: Date | string | null | undefined) => {
@@ -131,13 +131,15 @@ export default function EventRow({
                 <PencilIcon className="h-5 w-5" />
               </button>
             )}
-            <button
-              onClick={viewRegistrations}
-              className="text-purple-600 hover:text-purple-900 inline-flex items-center"
-              title="View registrations"
-            >
-              <UserGroupIcon className="h-5 w-5" />
-            </button>
+            {canViewRegistration && (
+              <button
+                onClick={viewRegistrations}
+                className="text-purple-600 hover:text-purple-900 inline-flex items-center"
+                title="View registrations"
+              >
+                <UserGroupIcon className="h-5 w-5" />
+              </button>
+            )}
             {canDelete && (
               <button
                 onClick={handleDelete}
