@@ -44,6 +44,39 @@ export default function AllEventsPage() {
     }
   };
 
+  const deleteEvent = async (id: number) => {
+    try {
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/events/${id}`, {
+        headers: {
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+      });
+      setEvents(events.filter(event => event.id !== id));
+    } catch (err) {
+      console.error(err);
+      setError(t('deleteError') || 'Failed to delete event');
+    }
+  };
+
+  const updateEvent = async (updatedEvent: Event) => {
+    try {
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${updatedEvent.id}`,
+        updatedEvent,
+        {
+          headers: {
+            Authorization: `Bearer ${session?.accessToken}`,
+          },
+        },
+      );
+      setEvents(events.map(event => (event.id === updatedEvent.id ? response.data : event)));
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError(t('updateError') || 'Failed to update event');
+    }
+  };
+    
   if (status === 'loading' || isLoading) {
     return (
       <div className="flex justify-center items-center h-[calc(100vh-200px)]">
@@ -67,8 +100,8 @@ export default function AllEventsPage() {
           <EventList
             events={events}
             currentUserId={Number(session?.user?.id) || 0}
-            deleteEvent={() => {}}
-            updateEvent={() => {}}
+            deleteEvent={deleteEvent}
+            updateEvent={updateEvent}
             isDeletedView={false}
             restoreEvent={() => {}}
           />

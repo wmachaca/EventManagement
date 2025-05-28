@@ -71,6 +71,7 @@
     "eventNotPublished": "This event is not currently accepting registrations.",
     "authError": "Authentication required",
     "publish": "Publish",
-    "cancelEvent": "Cancel event"
+    "cancelEvent": "Cancel event",
+    "registrationError": "Failed to register to event"
   }
 }
