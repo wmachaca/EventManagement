@@ -60,7 +60,6 @@ export default function EventRow({
   // Count approved attendees
   //  const approvedCount = applications.filter(app => app.status === 'APPROVED').length;
   //  console.log('Event row data:', event);
-  //  console.log('From backend', event._count.applications);
   const approvedAttendeesCount = event._count.applications;
 
   const formatDate = (date: Date | string | null | undefined) => {
