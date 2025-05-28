@@ -20,7 +20,8 @@ export interface Event {
   name: string;
   description?: string;
   location?: string;
-  schedule: string; // ISO string format
+  startDate: string;
+  endDate?: string;
   capacity: number;
   isVirtual: boolean;
   creatorId: number;

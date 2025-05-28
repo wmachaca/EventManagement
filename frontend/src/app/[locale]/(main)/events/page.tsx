@@ -62,7 +62,7 @@ export default function EventsPage() {
             </div>
           </Link>
 
-          <Link href="/events/calendar">
+          <Link href={`/${locale}/events/calendar`}>
             <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col items-center justify-center text-center">
               <CalendarIcon className="h-12 w-12 text-orange-500 mb-4" />
               <h2 className="text-xl font-semibold text-gray-800 mb-2">Event Calendar</h2>

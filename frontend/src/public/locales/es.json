@@ -94,5 +94,21 @@
     "fetchError": "Error al cargar las solicitudes",
     "updateError": "Error al actualizar el estado de la solicitud",
     "fetchEventError": "Error al cargar los detalles del evento"
+  },
+  "EventCalendar": {
+    "eventCalendar": "Calendario de Eventos",
+    "pleaseLogin": "Por favor, inicia sesión para ver el calendario",
+    "fetchError": "Error al obtener los eventos",
+    "today": "Hoy",
+    "previous": "Atrás",
+    "next": "Siguiente",
+    "month": "Mes",
+    "week": "Semana",
+    "day": "Día",
+    "agenda": "Agenda",
+    "date": "Fecha",
+    "time": "Hora",
+    "event": "Evento",
+    "noEvents": "No hay eventos en este rango"
   }
 }
