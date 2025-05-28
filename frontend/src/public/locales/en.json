@@ -94,5 +94,21 @@
     "fetchError": "Failed to fetch applications",
     "updateError": "Failed to update application status",
     "fetchEventError": "Failed to fetch event details"
+  },
+  "EventCalendar": {
+    "eventCalendar": "Event Calendar",
+    "pleaseLogin": "Please log in to view the calendar",
+    "fetchError": "Failed to fetch events",
+    "today": "Today",
+    "previous": "Back",
+    "next": "Next",
+    "month": "Month",
+    "week": "Week",
+    "day": "Day",
+    "agenda": "Agenda",
+    "date": "Date",
+    "time": "Time",
+    "event": "Event",
+    "noEvents": "No events in this range"
   }
 }
