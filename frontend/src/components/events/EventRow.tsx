@@ -8,7 +8,7 @@ import {
   UserGroupIcon,
   EyeIcon,
 } from '@heroicons/react/24/outline';
-import type { Event, EventStatus } from '@/types/event';
+import type { Event } from '@/types/event';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 
@@ -17,6 +17,7 @@ interface EventRowProps {
   deleteEvent: (id: number) => void;
   isDeletedView?: boolean;
   restoreEvent?: (id: number) => void;
+  currentUserId: number;
 }
 
 export default function EventRow({
@@ -24,16 +25,14 @@ export default function EventRow({
   deleteEvent,
   isDeletedView = false,
   restoreEvent,
+  currentUserId,
 }: EventRowProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const locale = useLocale();
   const router = useRouter();
 
-  const statusColors: Record<EventStatus, string> = {
-    DRAFT: 'bg-gray-100 text-gray-800',
-    PUBLISHED: 'bg-green-100 text-green-800',
-    CANCELED: 'bg-red-100 text-red-800',
-  };
+  const canEdit = currentUserId === event.creatorId;
+  const canDelete = canEdit;
 
   const handleDelete = () => {
     setIsDeleting(true);
@@ -47,18 +46,22 @@ export default function EventRow({
   };
 
   const viewRegistrations = () => {
-    router.push(`/events/${event.id}/registrations`);
+    router.push(`/${locale}/events/${event.id}/registrations`); //see if it handle the registrations
   };
 
   const viewDetails = () => {
     router.push(`/${locale}/events/${event.id}`);
   };
 
-
   const editEvent = () => {
-  router.push(`/${locale}/events/${event.id}/edit`);
-};
+    router.push(`/${locale}/events/${event.id}/edit`);
+  };
 
+  // Count approved attendees
+  //  const approvedCount = applications.filter(app => app.status === 'APPROVED').length;
+  //  console.log('Event row data:', event);
+  //  console.log('From backend', event._count.applications);
+  const approvedAttendeesCount = event._count.applications;
 
   const formatDate = (date: Date | string | null | undefined) => {
     if (!date) return '-';
@@ -76,36 +79,11 @@ export default function EventRow({
       </td>
 
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="flex items-center">
-          {event.isVirtual ? (
-            <span className="text-sm text-gray-500">Virtual</span>
-          ) : (
-            <>
-              <MapPinIcon className="h-4 w-4 mr-1 text-gray-500" />
-              <span className="text-sm text-gray-500">{event.location || '-'}</span>
-            </>
-          )}
-        </div>
+        <div className="text-sm text-gray-500">{event.capacity}</div>
       </td>
 
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="flex items-center">
-          <CalendarIcon className="h-4 w-4 mr-1 text-gray-500" />
-          <span className="text-sm text-gray-500">{formatDate(event.startDate)}</span>
-        </div>
-      </td>
-
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="flex items-center">
-          <CalendarIcon className="h-4 w-4 mr-1 text-gray-500" />
-          <span className="text-sm text-gray-500">{formatDate(event.endDate)}</span>
-        </div>
-      </td>
-
-      <td className="px-6 py-4 whitespace-nowrap">
-        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusColors[event.status]}`}>
-          {event.status}
-        </span>
+        <div className="text-sm text-gray-500">{approvedAttendeesCount}</div>
       </td>
 
       {isDeletedView && (
@@ -144,13 +122,15 @@ export default function EventRow({
             >
               <EyeIcon className="h-5 w-5" />
             </button>
-            <button
-              onClick={editEvent}
-              className="text-blue-600 hover:text-blue-900 inline-flex items-center"
-              title="Edit event"
-            >
-              <PencilIcon className="h-5 w-5" />
-            </button>
+            {canEdit && (
+              <button
+                onClick={editEvent}
+                className="text-blue-600 hover:text-blue-900 inline-flex items-center p-1 rounded hover:bg-blue-100"
+                title="Edit event"
+              >
+                <PencilIcon className="h-5 w-5" />
+              </button>
+            )}
             <button
               onClick={viewRegistrations}
               className="text-purple-600 hover:text-purple-900 inline-flex items-center"
@@ -158,14 +138,16 @@ export default function EventRow({
             >
               <UserGroupIcon className="h-5 w-5" />
             </button>
-            <button
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="text-red-600 hover:text-red-900 inline-flex items-center"
-              title="Delete event"
-            >
-              <TrashIcon className="h-5 w-5" />
-            </button>
+            {canDelete && (
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="text-red-600 hover:text-red-900 inline-flex items-center p-1 rounded hover:bg-red-100"
+                title="Delete event"
+              >
+                <TrashIcon className="h-5 w-5" />
+              </button>
+            )}
           </div>
         )}
       </td>

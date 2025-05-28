@@ -7,6 +7,7 @@ interface EventTableProps {
   updateEvent?: (event: Event) => void;
   isDeletedView?: boolean;
   restoreEvent?: (id: number) => void;
+  currentUserId: number;
 }
 
 export default function EventTable({
@@ -15,6 +16,7 @@ export default function EventTable({
   updateEvent,
   isDeletedView = false,
   restoreEvent,
+  currentUserId,
 }: EventTableProps) {
   return (
     <table className="min-w-full divide-y divide-gray-200">
@@ -24,16 +26,10 @@ export default function EventTable({
             Name
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Location
+            Capacity
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Start Date
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            End Date
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Status
+            Approved Attendees
           </th>
           {isDeletedView && (
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -54,6 +50,7 @@ export default function EventTable({
             updateEvent={updateEvent}
             isDeletedView={isDeletedView}
             restoreEvent={restoreEvent}
+            currentUserId={currentUserId}
           />
         ))}
       </tbody>

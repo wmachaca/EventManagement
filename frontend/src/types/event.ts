@@ -2,6 +2,11 @@
 export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELED';
 export type ApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
+export interface RegistrationStatus {
+  isRegistered: boolean;
+  status: ApplicationStatus | null;
+}
+
 // Basic user type (shared across app — consider moving to src/types/user.ts)
 export interface BasicUser {
   id: number;
@@ -25,6 +30,7 @@ export interface Event {
   version: number;
   isDeleted?: boolean;
   deletedAt?: string | null;
+  applications?: EventApplication[]  
 }
 
 // Extended event type for frontend display, e.g., when querying full creator info or attendees

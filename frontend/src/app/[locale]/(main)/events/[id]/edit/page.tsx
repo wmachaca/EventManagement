@@ -10,6 +10,25 @@ import { toast } from 'sonner';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { useLocale } from 'next-intl';
 
+type EventStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELED';
+
+interface Event {
+  id: number;
+  name: string;
+  description?: string;
+  imageUrl?: string;
+  location?: string;
+  startDate: string;
+  endDate?: string;
+  capacity: number;
+  virtualLink?: string;
+  isVirtual: boolean;
+  requiresApproval: boolean;
+  contactEmail?: string;
+  status: EventStatus;
+  version: number;
+}
+
 export default function EditEventPage({ params }: { params: { id: string } }) {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -17,8 +36,8 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
-  const [currentEvent, setCurrentEvent] = useState<any>(null);
-  const locale = useLocale();  
+  const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
+  const locale = useLocale();
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -40,7 +59,7 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
           headers: {
             Authorization: `Bearer ${session?.accessToken}`,
           },
-        }
+        },
       );
       console.log('Event fetched successfully:', response.data);
       setCurrentEvent(response.data);
@@ -53,8 +72,8 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
   };
 
   const handleUpdateEvent = async (formData: FormData) => {
-    if (!session?.accessToken) {
-      console.error('No access token available');
+    if (!session?.accessToken || !currentEvent) {
+      console.error('No access token available or no current event');
       setSubmissionError(t('authError'));
       return;
     }
@@ -65,30 +84,35 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
       const toastId = toast.loading(t('updatingEvent'));
 
       // Debug the request before sending
-      console.log('Sending PUT request to:', `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.id}`);
+      console.log(
+        'Sending PUT request to:',
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.id}`,
+      );
       console.log('Request headers:', {
         Authorization: `Bearer ${session.accessToken}`,
-        'Content-Type': 'multipart/form-data'
+        'Content-Type': 'multipart/form-data',
       });
 
-      await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.id}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${session?.accessToken}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.id}`, formData, {
+        headers: {
+          Authorization: `Bearer ${session?.accessToken}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
       toast.success(t('updateSuccess'), { id: toastId });
+      await fetchEvent();
       router.push(`/${locale}/events/${params.id}`);
     } catch (error) {
       console.error('Error updating event:', error);
       if (axios.isAxiosError(error)) {
         console.error('Error details:', error.response?.data);
-      }      
+        if (error.response?.status === 409) {
+          // Conflict error - data was modified concurrently
+          toast.error(t('concurrencyError'));
+          await fetchEvent(); // Refresh data
+        }
+      }
       setSubmissionError(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);

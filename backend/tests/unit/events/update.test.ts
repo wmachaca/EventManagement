@@ -29,7 +29,10 @@ describe('Event Update API', () => {
     const response = await request(app)
       .put(`/api/events/${testEvent.id}`)
       .set('Authorization', `Bearer ${authToken}`)
-      .send(updateEventData.validUpdate);
+      .send({
+        ...updateEventData.validUpdate,
+        version: testEvent.version,
+      });
 
     expect(response.status).toBe(200);
     expect(response.body.name).toBe(updateEventData.validUpdate.name);
@@ -69,5 +72,19 @@ describe('Event Update API', () => {
       .send(updateEventData.validUpdate);
 
     expect(response.status).toBe(403);
+  });
+  it('should fail if event version is outdated (optimistic concurrency)', async () => {
+    const outdatedData = {
+      ...updateEventData.validUpdate,
+      version: 0, // intentionally wrong version
+    };
+
+    const response = await request(app)
+      .put(`/api/events/${testEvent.id}`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send(outdatedData);
+
+    expect(response.status).toBe(409); // or custom 409 if you handle it
+    expect(response.body.message).toContain('concurrently');
   });
 });

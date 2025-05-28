@@ -20,6 +20,7 @@ export function getSampleEventData(creatorId: number): Prisma.EventCreateInput[]
       isVirtual: false,
       requiresApproval: true,
       status: 'PUBLISHED',
+      version: 1,
       creator: { connect: { id: creatorId } },
     },
     {
@@ -31,6 +32,7 @@ export function getSampleEventData(creatorId: number): Prisma.EventCreateInput[]
       capacity: 200,
       requiresApproval: false,
       status: 'PUBLISHED',
+      version: 1,
       creator: { connect: { id: creatorId } },
     },
     {
@@ -39,6 +41,7 @@ export function getSampleEventData(creatorId: number): Prisma.EventCreateInput[]
       startDate: futureDate(60),
       capacity: 50,
       status: 'DRAFT',
+      version: 1,
       creator: { connect: { id: creatorId } },
     },
   ];
@@ -89,6 +92,7 @@ export function generateEventData(
     isVirtual: false,
     requiresApproval: true,
     status: 'PUBLISHED',
+    version: 1,
     creator: { connect: { id: creatorId } },
     ...overrides,
   };
