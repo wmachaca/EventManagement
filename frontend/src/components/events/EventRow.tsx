@@ -17,7 +17,7 @@ interface EventRowProps {
   deleteEvent: (id: number) => void;
   isDeletedView?: boolean;
   restoreEvent?: (id: number) => void;
-  currentUserId: number;  
+  currentUserId: number;
 }
 
 export default function EventRow({
@@ -25,15 +25,14 @@ export default function EventRow({
   deleteEvent,
   isDeletedView = false,
   restoreEvent,
-  currentUserId,  
+  currentUserId,
 }: EventRowProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const locale = useLocale();
   const router = useRouter();
 
-  
   const canEdit = currentUserId === event.creatorId;
-  const canDelete = canEdit; 
+  const canDelete = canEdit;
 
   const handleDelete = () => {
     setIsDeleting(true);
@@ -47,23 +46,22 @@ export default function EventRow({
   };
 
   const viewRegistrations = () => {
-    router.push(`/events/${event.id}/registrations`);//see if it handle the registrations
+    router.push(`/${locale}/events/${event.id}/registrations`); //see if it handle the registrations
   };
 
   const viewDetails = () => {
     router.push(`/${locale}/events/${event.id}`);
   };
 
-
   const editEvent = () => {
-  router.push(`/${locale}/events/${event.id}/edit`);
-};
+    router.push(`/${locale}/events/${event.id}/edit`);
+  };
 
   // Count approved attendees
-  const approvedAttendeesCount = event.applications?.filter(
-    app => app.status === 'APPROVED'
-  ).length || 0;
-
+  //  const approvedCount = applications.filter(app => app.status === 'APPROVED').length;
+  //  console.log('Event row data:', event);
+  //  console.log('From backend', event._count.applications);
+  const approvedAttendeesCount = event._count.applications;
 
   const formatDate = (date: Date | string | null | undefined) => {
     if (!date) return '-';
@@ -81,15 +79,11 @@ export default function EventRow({
       </td>
 
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-gray-500">
-          {event.capacity}
-        </div>
+        <div className="text-sm text-gray-500">{event.capacity}</div>
       </td>
 
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-gray-500">
-          {approvedAttendeesCount}
-        </div>
+        <div className="text-sm text-gray-500">{approvedAttendeesCount}</div>
       </td>
 
       {isDeletedView && (

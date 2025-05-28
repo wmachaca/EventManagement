@@ -7,7 +7,7 @@ interface EventTableProps {
   updateEvent?: (event: Event) => void;
   isDeletedView?: boolean;
   restoreEvent?: (id: number) => void;
-  currentUserId: number;  
+  currentUserId: number;
 }
 
 export default function EventTable({

@@ -90,7 +90,7 @@ export default function EventList({
           updateEvent={updateEvent}
           isDeletedView={isDeletedView}
           restoreEvent={restoreEvent}
-          currentUserId={currentUserId}          
+          currentUserId={currentUserId}
         />
       )}
     </div>

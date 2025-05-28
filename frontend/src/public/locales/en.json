@@ -73,5 +73,26 @@
     "publish": "Publish",
     "cancelEvent": "Cancel event",
     "registrationError": "Failed to register to event"
+  },
+  "EventRegistrations": {
+    "backToEvents": "Back to Events",
+    "registrationsFor": "Registrations for",
+    "totalApplications": "total applications",
+    "name": "Name",
+    "email": "Email",
+    "status": "Status",
+    "appliedAt": "Applied At",
+    "actions": "Actions",
+    "noApplications": "No applications found",
+    "approve": "Approve",
+    "reject": "Reject",
+    "decisionMade": "Decision made",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "total": "Total",
+    "fetchError": "Failed to fetch applications",
+    "updateError": "Failed to update application status",
+    "fetchEventError": "Failed to fetch event details"
   }
 }
