@@ -24,6 +24,10 @@ import {
 import { formatDate, fetchEventDetails, checkRegistrationStatus } from '@/utils/eventUtils';
 import { useLocale } from 'next-intl';
 
+function getApprovedCount(applications: any[] = []) {
+  return applications.filter(app => app.status === 'APPROVED').length;
+}
+
 export default function EventDetailsPage({ params }: { params: { id: string } }) {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -47,7 +51,10 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
   const fetchEvent = async () => {
     try {
       const eventData = await fetchEventDetails(params.id, session);
-      console.log('Event requires approval:', eventData);
+      console.log(
+        'Event applications inside fetchEvent:',
+        getApprovedCount(eventData.applications),
+      );
       setEvent(eventData);
       setIsLoading(false);
     } catch (err) {
@@ -334,15 +341,17 @@ const EventDetailsSection = ({ event }) => (
             <p className="text-gray-600">
               {event.capacity ? (
                 <>
-                  {event.attendees?.length || 0} of {event.capacity} spots filled
-                  {event.attendees && event.capacity && (
+                  {getApprovedCount(event.applications)} of {event.capacity} spots filled
+                  {event.applications && (
                     <span className="block w-full bg-gray-200 rounded-full h-2.5 mt-1">
                       <span
                         className="block bg-blue-600 h-2.5 rounded-full"
                         style={{
                           width: `${Math.min(
                             100,
-                            Math.round(((event.attendees.length || 0) / event.capacity) * 100),
+                            Math.round(
+                              (getApprovedCount(event.applications) / event.capacity) * 100,
+                            ),
                           )}%`,
                         }}
                       ></span>
