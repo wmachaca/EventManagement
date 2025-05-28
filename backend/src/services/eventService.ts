@@ -88,6 +88,15 @@ export const listEvents = async (filter: {
     },
     include: {
       creator: true,
+      _count: {
+        select: {
+          applications: {
+            where: {
+              status: 'APPROVED',
+            },
+          },
+        },
+      },
     },
     orderBy: {
       createdAt: 'desc',

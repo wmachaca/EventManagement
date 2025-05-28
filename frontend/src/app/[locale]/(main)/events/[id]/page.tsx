@@ -22,6 +22,7 @@ import {
   handleRegistration as handleRegistrationUtil,
 } from '@/utils/registrationUtils';
 import { formatDate, fetchEventDetails, checkRegistrationStatus } from '@/utils/eventUtils';
+import { useLocale } from 'next-intl';
 
 export default function EventDetailsPage({ params }: { params: { id: string } }) {
   const { data: session, status } = useSession();
@@ -35,6 +36,7 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
     isRegistered: false,
     status: null,
   });
+  const locale = useLocale();
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -45,7 +47,7 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
   const fetchEvent = async () => {
     try {
       const eventData = await fetchEventDetails(params.id, session);
-      console.log("Event requires approval:", eventData);
+      console.log('Event requires approval:', eventData);
       setEvent(eventData);
       setIsLoading(false);
     } catch (err) {
@@ -105,7 +107,7 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
   };
 
   const editEvent = () => {
-    router.push(`/events/${params.id}/edit`);
+    router.push(`/${locale}/events/${params.id}/edit`);
   };
 
   if (status === 'loading' || isLoading) {
