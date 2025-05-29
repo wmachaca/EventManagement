@@ -1,0 +1,67 @@
+Event:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    title:
+      type: string
+    description:
+      type: string
+    startDate:
+      type: string
+      format: date-time
+    endDate:
+      type: string
+      format: date-time
+    location:
+      type: string
+    maxParticipants:
+      type: integer
+    imageUrl:
+      type: string
+    creatorId:
+      type: string
+      format: uuid
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time
+
+EventApplicationStatus:
+  type: string
+  enum: [PENDING, APPROVED, REJECTED]
+  description: Status of an event application
+
+EventApplication:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    eventId:
+      type: string
+      format: uuid
+    userId:
+      type: string
+      format: uuid
+    status:
+      $ref: '#/components/schemas/EventApplicationStatus'
+    message:
+      type: string
+      nullable: true
+    organizerMessage:
+      type: string
+      nullable: true
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time
+    user:
+      $ref: '#/components/schemas/User'
+    event:
+      $ref: '#/components/schemas/Event'

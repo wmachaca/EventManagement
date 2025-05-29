@@ -1,0 +1,29 @@
+openapi: 3.0.0
+info:
+  title: Event Management API
+  version: 1.0.0
+  description: API documentation for the Event Management System
+  contact:
+    name: API Support
+    email: support@eventmanager.com
+
+servers:
+  - url: http://localhost:${PORT}/api
+    description: Development server
+    variables:
+      PORT:
+        default: '5000'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # These will be imported from schemas/ files
+    $ref: './schemas/*.yaml'
+
+  parameters:
+    $ref: './schemas/common.yaml#/parameters'
