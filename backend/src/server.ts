@@ -10,6 +10,9 @@ import { filterAuthData } from './api/middleware/security';
 import dotenv from 'dotenv';
 import path from 'path';
 
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec, swaggerUiOptions } from './docs/swagger';
+
 dotenv.config(); // Load environment variables
 
 const app: Application = express();
@@ -38,6 +41,9 @@ app.use('/images', express.static(path.join(__dirname, '../public/images')));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
+
+// Swagger route (insert BEFORE error handler)
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 
 // Error handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

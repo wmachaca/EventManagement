@@ -1,0 +1,207 @@
+/events:
+  get:
+    tags:
+      - Events
+    summary: List all events
+    parameters:
+      - $ref: '#/components/parameters/page'
+      - $ref: '#/components/parameters/limit'
+    responses:
+      200:
+        description: List of events
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Event'
+
+  post:
+    tags:
+      - Events
+    summary: Create a new event
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            $ref: '#/components/schemas/Event'
+    responses:
+      201:
+        description: Event created
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      401:
+        description: Unauthorized
+
+/events/{id}:
+  get:
+    tags:
+      - Events
+    summary: Get a specific event
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      200:
+        description: Event details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      404:
+        description: Event not found
+# Event Application Endpoints
+/events/{eventId}/apply:
+  post:
+    tags:
+      - Event Applications
+    summary: Apply to an event
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: eventId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: ID of the event to apply to
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Optional message to the event organizer
+    responses:
+      201:
+        description: Application submitted successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventApplication'
+      400:
+        description: Invalid input or already applied
+      401:
+        description: Unauthorized
+      404:
+        description: Event not found
+
+/events/{eventId}/applications:
+  get:
+    tags:
+      - Event Applications
+    summary: Get applications for an event (organizer only)
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: eventId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: ID of the event
+      - $ref: '#/components/parameters/page'
+      - $ref: '#/components/parameters/limit'
+    responses:
+      200:
+        description: List of applications
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/EventApplication'
+      401:
+        description: Unauthorized or not the event organizer
+      404:
+        description: Event not found
+
+/events/{eventId}/registration:
+  get:
+    tags:
+      - Event Applications
+    summary: Check if current user is registered for an event
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: eventId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: ID of the event
+    responses:
+      200:
+        description: Registration status
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isRegistered:
+                  type: boolean
+                application:
+                  $ref: '#/components/schemas/EventApplication'
+      401:
+        description: Unauthorized
+      404:
+        description: Event not found
+
+/applications/{applicationId}:
+  put:
+    tags:
+      - Event Applications
+    summary: Update application status (organizer only)
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: ID of the application
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - status
+            properties:
+              status:
+                type: string
+                enum: [PENDING, APPROVED, REJECTED]
+              message:
+                type: string
+                description: Optional message to the applicant
+    responses:
+      200:
+        description: Application updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventApplication'
+      400:
+        description: Invalid status
+      401:
+        description: Unauthorized or not the event organizer
+      404:
+        description: Application not found

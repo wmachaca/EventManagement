@@ -1,0 +1,25 @@
+User:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    email:
+      type: string
+      format: email
+    name:
+      type: string
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time
+
+AuthToken:
+  type: object
+  properties:
+    token:
+      type: string
+    expiresIn:
+      type: integer
