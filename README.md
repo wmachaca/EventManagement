@@ -49,8 +49,8 @@ npm test
 
 ## 🛠 Tech Stack
 
-**Frontend:** React, Tailwind CSS, Next.js  
-**Backend:** Node.js, Express, Prisma ORM  
+**Frontend:** React, Tailwind CSS, Next.js, i18next, Axios  
+**Backend:** Node.js, Express, Prisma ORM, Swagger
 **Auth:** JWT, OAuth (e.g., Google)  
 **Database:** PostgreSQL  
 **Testing:** Jest, Supertest
