@@ -54,4 +54,4 @@ npm test
 **Auth:** JWT, OAuth (e.g., Google)  
 **Database:** PostgreSQL  
 **Testing:** Jest, Supertest
-**DevOps:** Docker, ESLint, Prettier
+**DevOps:** ESLint, Prettier

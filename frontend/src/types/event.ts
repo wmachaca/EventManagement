@@ -32,6 +32,9 @@ export interface Event {
   isDeleted?: boolean;
   deletedAt?: string | null;
   applications?: EventApplication[];
+  _count?: {
+    applications?: number;
+  };
 }
 
 // Extended event type for frontend display, e.g., when querying full creator info or attendees
