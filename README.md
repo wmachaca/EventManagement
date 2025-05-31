@@ -8,6 +8,20 @@ A global event management solution enabling users to create, manage, and attend 
 - JWT/OAuth authentication
 - Event application system
 - Optimistic concurrency control
+- API documentation (Swagger)
+
+## 📚 API Documentation
+
+We've implemented Swagger documentation for all API endpoints. Access it at:
+
+[http://localhost:5000/api-docs/](http://localhost:5000/api-docs/)
+
+Features:
+- Interactive endpoint testing
+- Request/response examples
+- Authentication requirements
+- Error code explanations
+
 
 ## 🚀 Installation & Usage
 
