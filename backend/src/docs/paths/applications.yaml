@@ -1,0 +1,255 @@
+/events/{eventId}/apply:
+  post:
+    tags: [Event Applications]
+    summary: Apply to an event
+    description: |
+      Submit an application to attend an event.
+      - Auto-approved if event doesn't require approval
+      - Returns application with current status
+      - Prevents duplicate applications
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: eventId
+        in: path
+        required: true
+        schema:
+          type: integer
+          example: 1
+        description: ID of the event to apply to
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "I'm excited to attend!"
+                description: Optional message to organizer
+                maxLength: 500
+    responses:
+      201:
+        description: Application submitted
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id: {type: integer, example: 1}
+                status: 
+                  type: string
+                  enum: [PENDING, APPROVED]
+                  example: "PENDING"
+                eventId: {type: integer, example: 1}
+                userId: {type: integer, example: 2}
+                appliedAt: {type: string, format: date-time}
+      400:
+        description: Invalid event ID format
+      401:
+        description: Not authenticated
+      403:
+        description: |
+          Forbidden when:
+          - Event is full
+          - Event not published
+          - Event has started
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error: {type: string, example: "Event is full"}
+      404:
+        description: Event not found
+      409:
+        description: Already applied
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error: {type: string, example: "Already applied to this event"}
+
+  delete:
+    tags: [Event Applications]
+    summary: Cancel registration
+    description: |
+      Cancel your application/registration to an event.
+      - Must be the applicant
+      - Cannot cancel after event starts
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: eventId
+        in: path
+        required: true
+        schema:
+          type: integer
+          example: 1
+    responses:
+      200:
+        description: Registration cancelled
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: {type: boolean, example: true}
+                message: {type: string, example: "Registration cancelled"}
+      400:
+        description: Invalid event ID
+      401:
+        description: Unauthenticated
+      403:
+        description: Event already started
+      404:
+        description: No registration found
+
+/events/{eventId}/registration:
+  get:
+    tags: [Event Applications]
+    summary: Check registration status
+    description: Check if current user is registered for an event
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: eventId
+        in: path
+        required: true
+        schema:
+          type: integer
+          example: 1
+    responses:
+      200:
+        description: Registration status
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: {type: boolean, example: true}
+                data:
+                  type: object
+                  properties:
+                    isRegistered: {type: boolean, example: true}
+                    status: 
+                      type: string
+                      enum: [PENDING, APPROVED, REJECTED]
+                      example: "PENDING"
+      400:
+        description: Invalid event ID
+      401:
+        description: Unauthenticated
+      404:
+        description: Event not found
+
+/events/{eventId}/applications:
+  get:
+    tags: [Event Applications]
+    summary: Get event applications (Organizer only)
+    description: List all applications for an event (event organizer only)
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: eventId
+        in: path
+        required: true
+        schema:
+          type: integer
+          example: 1
+      - $ref: '#/components/parameters/page'
+      - $ref: '#/components/parameters/limit'
+    responses:
+      200:
+        description: List of applications
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: {type: integer, example: 1}
+                  status: {type: string, enum: [PENDING, APPROVED, REJECTED]}
+                  user:
+                    type: object
+                    properties:
+                      id: {type: integer, example: 1}
+                      name: {type: string, example: "John Doe"}
+      403:
+        description: Not the event organizer
+      404:
+        description: Event not found
+
+/events/applications/{applicationId}:
+  put:
+    tags: [Event Applications]
+    summary: Update application status (Organizer only)
+    description: |
+      Approve or reject an application.
+      - Only event organizer can update
+      - Returns updated application
+      - Prevents invalid status transitions
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          type: integer
+          example: 1
+        description: ID of the application to update
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [status]
+            properties:
+              status:
+                type: string
+                enum: [APPROVED, REJECTED]
+                example: "APPROVED"
+              message:
+                type: string
+                example: "Welcome to our event!"
+                description: Optional message to applicant
+                maxLength: 500
+    responses:
+      200:
+        description: Status updated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id: {type: integer, example: 1}
+                status: {type: string, example: "APPROVED"}
+                eventId: {type: integer, example: 1}
+                userId: {type: integer, example: 2}
+                reviewedAt: {type: string, format: date-time}
+                reviewedById: {type: integer, example: 3}
+      400:
+        description: |
+          Invalid when:
+          - Invalid status value
+          - Invalid status transition
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error: {type: string, example: "Cannot approve an already approved application"}
+                validTransitions: 
+                  type: array
+                  items: {type: string}
+      401:
+        description: Not authenticated
+      403:
+        description: Not authorized (not event organizer)
+      404:
+        description: Application not found

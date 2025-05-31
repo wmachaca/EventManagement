@@ -1,24 +1,6 @@
 /events:
-  get:
-    tags:
-      - Events
-    summary: List all events
-    parameters:
-      - $ref: '#/components/parameters/page'
-      - $ref: '#/components/parameters/limit'
-    responses:
-      200:
-        description: List of events
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/Event'
-
   post:
-    tags:
-      - Events
+    tags: [Events]
     summary: Create a new event
     security:
       - bearerAuth: []
@@ -27,181 +9,374 @@
       content:
         multipart/form-data:
           schema:
-            $ref: '#/components/schemas/Event'
+            type: object
+            required:
+              - name
+              - startDate
+              - status
+            properties:
+              name:
+                type: string
+                example: "Tech Conference 2023"
+              description:
+                type: string
+                example: "Annual technology conference"
+              startDate:
+                type: string
+                format: date-time
+                example: "2025-11-15T09:00:00Z"
+              endDate:
+                type: string
+                format: date-time
+                example: "2025-12-17T18:00:00Z"
+              isVirtual:
+                type: boolean
+                example: false
+              virtualLink:
+                type: string
+                example: "https://zoom.us/meeting123"
+              capacity:
+                type: integer
+                example: 100
+              status:
+                type: string
+                enum: [DRAFT, PUBLISHED, CANCELLED]
+                example: "PUBLISHED"
+              image:
+                type: string
+                format: binary
+              requiresApproval:
+                type: boolean
+                example: true                
     responses:
       201:
-        description: Event created
+        description: Event created successfully
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Event'
+              type: object
+              properties:
+                id: {type: integer, example: 1}
+                name: {type: string, example: "Tech Conference 2023"}
+                creatorId: {type: integer, example: 1}
+                status: {type: string, example: "PUBLISHED"}
+      400:
+        description: Invalid input
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: {type: boolean, example: false}
+                message: {type: string, example: "Validation failed"}
+                errors: 
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      field: {type: string, example: "name"}
+                      message: {type: string, example: "Name is required"}
       401:
         description: Unauthorized
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: {type: boolean, example: false}
+                message: {type: string, example: "Authentication required"}
+/events/my:
+  get:
+    tags: [Events]
+    summary: List my events
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/statusFilter'
+    responses:
+      200:
+        description: List of user's events
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: {type: integer, example: 1}
+                  name: {type: string, example: "My Private Event"}
+                  status: {type: string, example: "DRAFT"}
+
+/events/all:
+  get:
+    tags: [Events]
+    summary: List all public events
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/statusFilter'
+    responses:
+      200:
+        description: List of public events
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: {type: integer, example: 1}
+                  name: {type: string, example: "Public Conference"}
+                  status: {type: string, example: "PUBLISHED"}
+
+/events/trash:
+  get:
+    tags: [Events]
+    summary: List deleted events
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: List of soft-deleted events
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: {type: integer, example: 1}
+                  name: {type: string, example: "Deleted Event"}
+                  isDeleted: {type: boolean, example: true}
 
 /events/{id}:
   get:
-    tags:
-      - Events
-    summary: Get a specific event
+    tags: [Events]
+    summary: Get event details
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
         required: true
         schema:
-          type: string
-          format: uuid
+          type: integer
+          example: 1
     responses:
       200:
         description: Event details
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Event'
+              type: object
+              properties:
+                id: {type: integer, example: 1}
+                name: {type: string, example: "Tech Conference 2023"}
+                description: {type: string, example: "Annual tech event"}
+                startDate: {type: string, format: date-time, example: "2023-12-15T09:00:00Z"}
+                status: {type: string, example: "PUBLISHED"}
+                creatorId: {type: integer, example: 1}
       404:
         description: Event not found
-# Event Application Endpoints
-/events/{eventId}/apply:
-  post:
-    tags:
-      - Event Applications
-    summary: Apply to an event
-    security:
-      - bearerAuth: []
-    parameters:
-      - name: eventId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-        description: ID of the event to apply to
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                description: Optional message to the event organizer
-    responses:
-      201:
-        description: Application submitted successfully
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EventApplication'
-      400:
-        description: Invalid input or already applied
-      401:
-        description: Unauthorized
-      404:
-        description: Event not found
-
-/events/{eventId}/applications:
-  get:
-    tags:
-      - Event Applications
-    summary: Get applications for an event (organizer only)
-    security:
-      - bearerAuth: []
-    parameters:
-      - name: eventId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-        description: ID of the event
-      - $ref: '#/components/parameters/page'
-      - $ref: '#/components/parameters/limit'
-    responses:
-      200:
-        description: List of applications
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/EventApplication'
-      401:
-        description: Unauthorized or not the event organizer
-      404:
-        description: Event not found
-
-/events/{eventId}/registration:
-  get:
-    tags:
-      - Event Applications
-    summary: Check if current user is registered for an event
-    security:
-      - bearerAuth: []
-    parameters:
-      - name: eventId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-        description: ID of the event
-    responses:
-      200:
-        description: Registration status
         content:
           application/json:
             schema:
               type: object
               properties:
-                isRegistered:
-                  type: boolean
-                application:
-                  $ref: '#/components/schemas/EventApplication'
-      401:
-        description: Unauthorized
-      404:
-        description: Event not found
+                success: {type: boolean, example: false}
+                message: {type: string, example: "Event not found"}
 
-/applications/{applicationId}:
   put:
-    tags:
-      - Event Applications
-    summary: Update application status (organizer only)
+    tags: [Events]
+    summary: Update an event
+    description: |
+      Update event details. Requires:
+      - Valid JWT token
+      - Ownership of the event
+      - Correct version number for optimistic concurrency control
     security:
       - bearerAuth: []
     parameters:
-      - name: applicationId
+      - name: id
         in: path
         required: true
         schema:
-          type: string
-          format: uuid
-        description: ID of the application
+          type: integer
+          example: 1
+        description: ID of the event to update
     requestBody:
       required: true
       content:
-        application/json:
+        application/json:  # Changed from multipart/form-data since your tests don't use file uploads
           schema:
             type: object
-            required:
-              - status
+            required: [version]
             properties:
-              status:
+              name:
                 type: string
-                enum: [PENDING, APPROVED, REJECTED]
-              message:
+                example: "Updated Event Name"
+                minLength: 3
+                maxLength: 100
+              description:
                 type: string
-                description: Optional message to the applicant
+                example: "Updated event description"
+                nullable: true
+              capacity:
+                type: integer
+                example: 100
+                minimum: 1
+              version:
+                type: integer
+                example: 1
+                description: Current version of the event for optimistic concurrency
     responses:
       200:
-        description: Application updated successfully
+        description: Event updated successfully
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EventApplication'
+              type: object
+              properties:
+                success: 
+                  type: boolean
+                  example: true
+                data:
+                  type: object
+                  properties:
+                    event:
+                      type: object
+                      properties:
+                        id: 
+                          type: integer
+                          example: 1
+                        name: 
+                          type: string
+                          example: "Updated Event Name"
+                        description:
+                          type: string
+                          nullable: true
+                        capacity:
+                          type: integer
+                          example: 100
+                        version:
+                          type: integer
+                          example: 2
       400:
-        description: Invalid status
-      401:
-        description: Unauthorized or not the event organizer
+        description: |
+          Invalid input data. Possible reasons:
+          - Missing required fields
+          - Invalid data types
+          - Validation errors (e.g., name too short)
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: 
+                  type: boolean
+                  example: false
+                message: 
+                  type: string
+                  example: "Validation failed"
+                errors:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      field: {type: string, example: "name"}
+                      message: {type: string, example: "Name must be at least 3 characters"}
+      403:
+        description: Not authorized to update this event
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: {type: boolean, example: false}
+                message: {type: string, example: "Not authorized to update this event"}
       404:
-        description: Application not found
+        description: Event not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: {type: boolean, example: false}
+                message: {type: string, example: "Event not found"}
+      409:
+        description: Version conflict (optimistic concurrency)
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: {type: boolean, example: false}
+                message: {type: string, example: "Event was modified by another user"}
+
+  delete:
+    tags: [Events]
+    summary: Delete an event (soft delete)
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          example: 1
+    responses:
+      200:
+        description: Event soft-deleted
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: {type: boolean, example: true}
+                data:
+                  type: object
+                  properties:
+                    event:
+                      type: object
+                      properties:
+                        isDeleted: {type: boolean, example: true}
+                    deletedAt: {type: string, format: date-time}
+      403:
+        description: Not authorized to delete this event
+      404:
+        description: Event not found
+
+/events/{id}/restore:
+  post:
+    tags: [Events]
+    summary: Restore a deleted event
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          example: 1
+    responses:
+      200:
+        description: Event restored
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: {type: boolean, example: true}
+                data:
+                  type: object
+                  properties:
+                    event:
+                      type: object
+                      properties:
+                        isDeleted: {type: boolean, example: false}
+      403:
+        description: Not authorized to restore this event
+      404:
+        description: Event not found

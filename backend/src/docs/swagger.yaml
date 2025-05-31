@@ -2,11 +2,27 @@ openapi: 3.0.0
 info:
   title: Event Management API
   version: 1.0.0
-  description: API documentation for the Event Management System
-  contact:
-    name: API Support
-    email: support@eventmanager.com
+  description: |
+    API documentation for the Event Management System.
+    
+    ## Authentication
+    
+    The API uses JWT for authentication. After registering or logging in, you'll receive a token that should be included in subsequent requests:
+    
+    ```
+    Authorization: Bearer <token>
+    ```
+    
+    For Google OAuth, the frontend should handle the Google login flow and send the credential token to the `/auth/google` endpoint.
 
+tags:
+  - name: Authentication
+    description: User registration and authentication
+  - name: Events
+    description: Event management operations
+  - name: Event Applications
+    description: Event registration and applications
+    
 servers:
   - url: http://localhost:${PORT}/api
     description: Development server
@@ -14,16 +30,22 @@ servers:
       PORT:
         default: '5000'
 
+# Add this to your existing components
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: >
+        Enter your JWT token in the format **Bearer <token>**
+        
+        Example: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
 
-  schemas:
-    # These will be imported from schemas/ files
-    $ref: './schemas/*.yaml'
-
+  # Reference your common components
+  responses:
+    $ref: './schemas/common.yaml#/components/responses'
   parameters:
-    $ref: './schemas/common.yaml#/parameters'
+    $ref: './schemas/common.yaml#/components/parameters'
+  schemas:
+    $ref: './schemas/*.yaml#/components/schemas'
