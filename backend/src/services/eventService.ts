@@ -22,6 +22,7 @@ export const createEvent = async (input: CreateEventInput) => {
       capacity: input.capacity,
       isVirtual: input.isVirtual,
       virtualLink: input.virtualLink,
+      requiresApproval: input.requiresApproval,      
       imageUrl: input.imageUrl,
       status: input.status || 'DRAFT', // Default to DRAFT if not provided
       creator: {

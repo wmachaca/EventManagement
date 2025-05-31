@@ -1,7 +1,6 @@
 /auth/register:
   post:
-    tags:
-      - Authentication
+    tags: [Authentication]
     summary: Register a new user
     requestBody:
       required: true
@@ -9,33 +8,70 @@
         application/json:
           schema:
             type: object
-            required:
-              - email
-              - password
-              - name
+            required: [name, email, password]
             properties:
+              name:
+                type: string
+                example: "Test User"
               email:
                 type: string
                 format: email
+                example: "test@example.com"
               password:
                 type: string
                 format: password
-              name:
-                type: string
+                example: "Password123!"
     responses:
       201:
-        description: User registered successfully
+        description: Registration successful
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              type: object
+              properties:
+                success: {type: boolean, example: true}
+                message: {type: string, example: "User registered successfully"}
+                data:
+                  type: object
+                  properties:
+                    user:
+                      type: object
+                      properties:
+                        id: {type: integer, example: 1}
+                        name: {type: string, example: "Test User"}
+                        email: {type: string, example: "test@example.com"}
+                        provider: {type: string, example: "credentials"}
+                        createdAt: {type: string, example: "2023-01-01T00:00:00Z"}
+                    token: {type: string, example: "eyJhbGciOiJIUz..."}
+                    expiresIn: {type: integer, example: 3600}
       400:
         description: Invalid input
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: {type: boolean, example: false}
+                errors: 
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      field: {type: string, example: "email"}
+                      message: {type: string, example: "Invalid email format"}
+      409:
+        description: Email already registered
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: {type: boolean, example: false}
+                message: {type: string, example: "Email is already registered"}
 
 /auth/login:
   post:
-    tags:
-      - Authentication
+    tags: [Authentication]
     summary: Login a user
     requestBody:
       required: true
@@ -43,22 +79,54 @@
         application/json:
           schema:
             type: object
-            required:
-              - email
-              - password
+            required: [email, password]
             properties:
               email:
                 type: string
                 format: email
+                example: "test@example.com"
               password:
                 type: string
                 format: password
+                example: "Password123!"
     responses:
       200:
         description: Login successful
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AuthToken'
+              type: object
+              properties:
+                success: {type: boolean, example: true}
+                data:
+                  type: object
+                  properties:
+                    token: {type: string, example: "eyJhbGciOiJIUz..."}
+                    user:
+                      type: object
+                      properties:
+                        email: {type: string, example: "test@example.com"}
+      400:
+        description: Missing fields
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: {type: boolean, example: false}
+                errors: 
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      field: {type: string, example: "email"}
+                      message: {type: string, example: "Email is required"}
       401:
         description: Invalid credentials
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: {type: boolean, example: false}
+                message: {type: string, example: "Invalid credentials"}
