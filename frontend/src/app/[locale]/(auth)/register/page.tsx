@@ -51,7 +51,7 @@ export default function RegisterPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept-Language': locale, // Add this header
+          'Accept-Language': locale, 
         },
         body: JSON.stringify({
           name: data.name,
@@ -62,9 +62,18 @@ export default function RegisterPage() {
 
       const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Registration failed');
+    if (!response.ok) {
+      // Handle specific error statuses
+      if (response.status === 409) {
+        throw new Error(t('errors.emailExists') || 'Email is already registered');
       }
+      if (response.status === 400) {
+        // Handle validation errors from backend
+        const backendErrors = result.errors?.map((e: any) => e.message).join(', ') || result.message;
+        throw new Error(backendErrors || 'Validation failed');
+      }
+      throw new Error(result.message || 'Registration failed');
+    }
 
       // Optional: Automatically sign in after registration
       const signInResult = await signIn('credentials', {
@@ -81,7 +90,11 @@ export default function RegisterPage() {
       }
     } catch (error) {
       console.error('Registration error:', error);
-      setApiError(error instanceof Error ? error.message : 'Registration failed');
+      setApiError(
+      error instanceof Error 
+        ? error.message 
+        : t('errors.registrationFailed') || 'Registration failed'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -91,12 +104,20 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">{t('title')}</h1>
-
-        {apiError && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {apiError}
+      {apiError && (
+        <div 
+          className="mb-4 p-4 rounded-md bg-red-50 border border-red-200 text-red-700"
+          role="alert"
+        >
+          <div className="flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clipRule="evenodd" />
+            </svg>
+            <h3 className="font-medium">{t('errors.errorTitle') || 'Error'}</h3>
           </div>
-        )}
+          <p className="mt-2 text-sm">{apiError}</p>
+        </div>
+      )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>

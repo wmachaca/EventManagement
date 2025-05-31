@@ -40,7 +40,13 @@
       "submitting": "Creating account...",
       "alreadyHaveAccount": "Already have an account?",
       "loginHere": "Login here",
-      "loginLink": "Login here"
+      "loginLink": "Login here",
+      "passwordRequirements": "Minimum 6 characters",
+      "errors": {
+        "errorTitle": "Error",
+        "emailExists": "This email is already registered",
+        "registrationFailed": "Registration failed, please try again"
+      }      
     }
   },
   "Events": {
