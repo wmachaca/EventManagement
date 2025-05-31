@@ -12,9 +12,7 @@ A global event management solution enabling users to create, manage, and attend 
 
 ## 📚 API Documentation
 
-We've implemented Swagger documentation for all API endpoints. Access it at:
-
-[http://localhost:5000/api-docs/](http://localhost:5000/api-docs/)
+Swagger documentation is available for all API endpoints. To explore the API, visit http://localhost:5000/api-docs/ in your browser.
 
 Features:
 - Interactive endpoint testing
