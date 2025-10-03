@@ -28,32 +28,38 @@ Features:
 
 ### Prerequisites
 
-- Node.js v18+
-- PostgreSQL 15+
-- **Test database user:** `testuserem` (create with: `CREATE USER testuserem WITH PASSWORD 'yourpassword'`)
+- **Node.js** v18+
+- **PostgreSQL** 15+
+- Ensure you have a PostgreSQL superuser account (default: `postgres`).
 
 ### Quick Start
 
 ```bash
-# 1. Clone and setup
+# 1. Clone the repository
 git clone https://github.com/yourusername/event-management.git
 cd event-management
-cp .env.example .env
 
-# 2. Initialize databases
-# Development DB
-npx prisma migrate dev
-# Test DB (one-time setup)
-psql -U postgres -h localhost -c "CREATE DATABASE eventmanager_test WITH OWNER testuserem"
-DATABASE_URL=postgresql://testuserem:yourpassword@localhost:5432/eventmanager_test npx prisma migrate deploy
+# 2. Make the setup script executable
+chmod +x setup-dev.sh
 
-# 3. Seed the database (optional)
-npm run seed
-
-# 4. Start dev servers
-backend: npm run dev
-frontend: npm run dev
+# 3. Run the setup script
+./setup-dev.sh
 ```
+
+The `setup-dev.sh` script will:
+1. **Set up environment files**:
+   - Copies `backend/.env.test` to `backend/.env`.
+   - Copies `frontend/.env` to `frontend/.env`.
+2. **Install dependencies**:
+   - Installs `npm` dependencies for both the backend and frontend.
+3. **Initialize the database**:
+   - Creates a PostgreSQL user `testuserem` with the password `testpasswordem`.
+   - Creates a database `eventmanager_test` owned by `testuserem`.
+   - Runs Prisma migrations to set up the database schema.
+4. **Seed the database**:
+   - Populates the database with sample data (users and events).
+5. **Provide instructions**:
+   - Displays commands to start the backend and frontend development servers.
 
 ---
 
@@ -63,39 +69,29 @@ The application includes a seed script to populate the database with sample data
 - **2 Users**: Each with unique credentials.
 - **4 Events**: Two events per user (virtual and in-person).
 
-### How to Seed the Database
-1. Ensure the database is initialized with `npx prisma migrate dev`.
-2. Run the seed script:
-   ```bash
-   npm run seed
-   ```
-3. Verify the seeded data:
-   - Open your database client (e.g., Prisma Studio, pgAdmin).
-   - Check the `User` and `Event` tables for the seeded data.
-
 ### Seed Script Details
 - **Users**:
   - `test1@example.com` with password `test1passwrd`
-  - `test2@example.com` with password `test2passwrd`
+- `test2@example.com` with password `test2passwrd`
 - **Events**:
-  - User 1:
-    - "SCOPE Nuclear Conference 2025" (in-person)
+- User 1:
+  - "SCOPE Nuclear Conference 2025" (in-person)
     - "AATN Virtual Conference" (virtual)
-  - User 2:
-    - "AI Workshop" (in-person)
+    - User 2:
+  - "AI Workshop" (in-person)
     - "Cloud Computing Webinar" (virtual)
 
 ---
 
-## Running Tests
+## 🧪 Running Tests
 
+### Backend Tests
+To run the backend test suite:
 ```bash
-# From project root:
 cd backend
-
-# Run complete test suite
 npm test
 ```
+
 
 ---
 
@@ -137,4 +133,29 @@ npm test
 └── README.md                   # Project documentation
 ```
 
---
+---
+
+## 🛠️ GitHub Actions for Backend
+
+The backend is configured with a GitHub Actions workflow for testing. The workflow is located at `.github/workflows/backend-tests.yml`.
+
+### Workflow Overview
+- **Trigger**: Runs on every push or pull request to the `develop` branch.
+- **Steps**:
+  1. Checkout the repository.
+  2. Set up Node.js and install dependencies.
+  3. Set up a PostgreSQL service.
+  4. Run Prisma migrations.
+  5. Execute the test suite.
+
+### Running the Workflow
+To trigger the workflow:
+1. Push changes to the `develop` branch:
+   ```bash
+   git push origin develop
+   ```
+2. Open a pull request to `develop`.
+
+You can monitor the workflow in the "Actions" tab of your GitHub repository.
+
+

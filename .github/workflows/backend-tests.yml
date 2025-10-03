@@ -1,0 +1,91 @@
+name: Backend Tests (Linux)
+
+on:
+  push:
+    branches: [develop]
+    paths: ['backend/**']
+  pull_request:
+    branches: [develop]
+    paths: ['backend/**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: testuserem
+          POSTGRES_PASSWORD: testpasswordem
+          POSTGRES_DB: eventmanager_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U testuserem"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            backend/
+            !**/node_modules/
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./backend
+
+      - name: Create .env.test file
+        run: |
+          cat << EOF > backend/.env.test
+          PORT=5000
+          DATABASE_URL="postgresql://testuserem:testpasswordem@localhost:5432/eventmanager_test?schema=public"
+          JWT_SECRET=your_super_secret_key
+          GOOGLE_CLIENT_ID=test-client-id
+          GOOGLE_CLIENT_SECRET=test-client-secret
+          GOOGLE_CALLBACK_URL=http://localhost:5000/auth/google/callback
+          FRONTEND_URL=http://localhost:3000
+          CI=true
+          EOF
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          for i in {1..10}; do
+            if pg_isready -h localhost -p 5432 -U testuserem -d eventmanager_test; then
+              echo "PostgreSQL is ready"
+              exit 0
+            fi
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+          echo "PostgreSQL did not become ready in time"
+          exit 1
+
+      - name: Set up Prisma
+        run: |
+          npx prisma generate
+          npx prisma migrate deploy
+        working-directory: ./backend
+        env:
+          DATABASE_URL: 'postgresql://testuserem:testpasswordem@localhost:5432/eventmanager_test?schema=public'
+
+      - name: Run tests
+        run: npm test
+        working-directory: ./backend
+        env:
+          DATABASE_URL: 'postgresql://testuserem:testpasswordem@localhost:5432/eventmanager_test?schema=public'
+          CI: 'true'
