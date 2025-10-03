@@ -121,7 +121,9 @@ npm test
 │   │   ├── seed.ts             # Database seed script
 │   ├── src
 │   │   ├── api                 # API routes and controllers
+│   │   ├── config              # Passport for google auth.
 │   │   ├── database            # Prisma client setup
+│   │   ├── docs                # Swagger configuration
 │   │   ├── server.ts           # Express server entry point
 │   ├── tests                   # Unit and integration tests
 │   └── package.json            # Backend dependencies and scripts
