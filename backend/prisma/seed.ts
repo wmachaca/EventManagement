@@ -50,7 +50,8 @@ async function main() {
         endDate: new Date('2025-12-03'),
         capacity: 500,
         isVirtual: false,
-        creatorId: user1.id
+        creatorId: user1.id,
+        status: 'PUBLISHED',
       },
       {
         name: 'AATN Virtual Conference',
@@ -59,7 +60,8 @@ async function main() {
         startDate: new Date('2025-12-15'),
         capacity: 200,
         isVirtual: true,
-        creatorId: user1.id
+        creatorId: user1.id,
+        status: 'PUBLISHED',
       },
     ],
   });
@@ -75,7 +77,9 @@ async function main() {
         endDate: new Date('2026-01-02'),
         capacity: 100,
         isVirtual: false,
-        creatorId: user2.id
+        creatorId: user2.id,
+        status: 'PUBLISHED',
+        requiresApproval: true, // Set requiresApproval to true
       },
       {
         name: 'Cloud Computing Webinar',
@@ -84,7 +88,8 @@ async function main() {
         startDate: new Date('2026-01-20'),
         capacity: 300,
         isVirtual: true,
-        creatorId: user2.id
+        creatorId: user2.id,
+        status: 'PUBLISHED',
       },
     ],
   });
