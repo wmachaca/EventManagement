@@ -36,6 +36,7 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        //console.log('Authorize function called with:', credentials); //testing
         if (!credentials?.email || !credentials?.password) {
           throw new Error('Email and password are required');
         }
@@ -61,6 +62,7 @@ export const authOptions: NextAuthOptions = {
         } catch (error) {
           const err = error as AxiosError<{ message: string }>;
           const msg = err.response?.data?.message || 'Login failed';
+          //console.error('Authorize error:', err.response?.data || err.message); //test
           throw new Error(msg);
         }
       },
