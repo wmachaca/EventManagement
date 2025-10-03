@@ -17,6 +17,7 @@ A global event management solution enabling users to create, manage, and attend 
 Swagger documentation is available for all API endpoints. To explore the API, visit [http://localhost:5000/api-docs/](http://localhost:5000/api-docs/) in your browser.
 
 Features:
+
 - Interactive endpoint testing
 - Request/response examples
 - Authentication requirements
@@ -47,6 +48,7 @@ chmod +x setup-dev.sh
 ```
 
 The `setup-dev.sh` script will:
+
 1. **Set up environment files**:
    - Copies `backend/.env.test` to `backend/.env`.
    - Copies `frontend/.env` to `frontend/.env`.
@@ -66,10 +68,12 @@ The `setup-dev.sh` script will:
 ## 🌱 Seeding the Database
 
 The application includes a seed script to populate the database with sample data, including:
+
 - **2 Users**: Each with unique credentials.
 - **4 Events**: Two events per user (virtual and in-person).
 
 ### Seed Script Details
+
 - **Users**:
   - `test1@example.com` with password `test1passwrd`
 - `test2@example.com` with password `test2passwrd`
@@ -86,12 +90,13 @@ The application includes a seed script to populate the database with sample data
 ## 🧪 Running Tests
 
 ### Backend Tests
+
 To run the backend test suite:
+
 ```bash
 cd backend
 npm test
 ```
-
 
 ---
 
@@ -117,7 +122,6 @@ npm test
 │   ├── src
 │   │   ├── api                 # API routes and controllers
 │   │   ├── database            # Prisma client setup
-│   │   ├── middleware          # Middleware (e.g., auth, validation)
 │   │   ├── server.ts           # Express server entry point
 │   ├── tests                   # Unit and integration tests
 │   └── package.json            # Backend dependencies and scripts
@@ -127,7 +131,6 @@ npm test
 │   │   ├── components          # Reusable components
 │   │   ├── hooks               # Custom hooks
 │   │   ├── lib                 # Utility libraries (e.g., auth, API)
-│   │   ├── pages               # Static and dynamic pages
 │   ├── public                  # Static assets (e.g., images)
 │   └── package.json            # Frontend dependencies and scripts
 └── README.md                   # Project documentation
@@ -140,6 +143,7 @@ npm test
 The backend is configured with a GitHub Actions workflow for testing. The workflow is located at `.github/workflows/backend-tests.yml`.
 
 ### Workflow Overview
+
 - **Trigger**: Runs on every push or pull request to the `develop` branch.
 - **Steps**:
   1. Checkout the repository.
@@ -149,7 +153,9 @@ The backend is configured with a GitHub Actions workflow for testing. The workfl
   5. Execute the test suite.
 
 ### Running the Workflow
+
 To trigger the workflow:
+
 1. Push changes to the `develop` branch:
    ```bash
    git push origin develop
@@ -157,5 +163,3 @@ To trigger the workflow:
 2. Open a pull request to `develop`.
 
 You can monitor the workflow in the "Actions" tab of your GitHub repository.
-
-
