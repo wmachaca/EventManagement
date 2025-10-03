@@ -1,4 +1,3 @@
-  GNU nano 7.2                       .gitignore                                 
 # Node modules
 node_modules/
 
@@ -19,12 +18,13 @@ yarn-error.log
 !.vscode/extensions.json
 !.vscode/settings.json
 
-# OS-specific files
+# OS-specific files# OS-specific files
 .DS_Store
 Thumbs.db
 
-# IDE-specific files
+# IDE-specific files# IDE-specific files
 .idea/
 
-# Package-lock and yarn lock
-package-lock.json
+# Ignore all package-lock.json files except the one in backend# Remove this line to stop ignoring package-lock.json
+#package-lock.json
+#!backend/package-lock.json
