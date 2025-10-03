@@ -8,7 +8,8 @@
     "dev": "nodemon --watch src --ext ts,json --exec ts-node src/server.ts",
     "test": "cross-env NODE_ENV=test dotenv -e .env.test jest",
     "prisma:generate": "prisma generate",
-    "postinstall": "npm run prisma:generate"
+    "postinstall": "npm run prisma:generate",
+    "seed": "ts-node --require tsconfig-paths/register prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
