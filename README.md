@@ -21,7 +21,6 @@ Features:
 - Interactive endpoint testing
 - Request/response examples
 - Authentication requirements
-- Error code explanations
 
 ---
 
@@ -76,13 +75,13 @@ The application includes a seed script to populate the database with sample data
 
 - **Users**:
   - `test1@example.com` with password `test1passwrd`
-- `test2@example.com` with password `test2passwrd`
+  - `test2@example.com` with password `test2passwrd`
 - **Events**:
-- User 1:
-  - "SCOPE Nuclear Conference 2025" (in-person)
+  - User 1:
+    - "SCOPE Nuclear Conference 2025" (in-person)
     - "AATN Virtual Conference" (virtual)
-    - User 2:
-  - "AI Workshop" (in-person)
+  - User 2:
+    - "AI Workshop" (in-person)
     - "Cloud Computing Webinar" (virtual)
 
 ---
@@ -95,6 +94,8 @@ To run the backend test suite:
 
 ```bash
 cd backend
+
+# Run complete test suite
 npm test
 ```
 
@@ -102,12 +103,81 @@ npm test
 
 ## 🛠 Tech Stack
 
-**Frontend:** React, Tailwind CSS, Next.js, i18next, Axios  
-**Backend:** Node.js, Express, Prisma ORM, Swagger  
-**Auth:** JWT, OAuth (e.g., Google)  
-**Database:** PostgreSQL  
-**Testing:** Jest, Supertest  
-**DevOps:** ESLint, Prettier
+**Frontend**:
+
+- React
+- Tailwind CSS
+- Next.js
+- i18next (for multi-language support)
+- Axios (for HTTP requests)
+
+**Backend**:
+
+- Node.js
+- Express
+- Prisma ORM
+- Swagger (for API documentation)
+
+**Auth**:
+
+- **NextAuth**:
+  - Supports **credentials-based authentication** (email/password).
+  - Integrates with **Google OAuth** for social login.
+  - Manages sessions using JWT.
+
+**Database**:
+
+- PostgreSQL
+
+**Testing**:
+
+- Jest
+- Supertest
+
+**DevOps**:
+
+- ESLint
+- Prettier
+
+---
+
+## 🔐 Authentication Flow
+
+The application uses **NextAuth** for authentication. Below is an overview of the login flow:
+
+### **Login Flow with Credentials (Email/Password)**
+
+1. **Frontend**:
+
+   - The user fills out the login form on the `login/page.tsx` page and clicks the "Login" button.
+   - The `handleSubmit` function calls `signIn('credentials')` from NextAuth.
+
+2. **NextAuth API Route**:
+
+   - The request is received by the NextAuth API route (`/api/auth/[...nextauth]/route.ts`).
+   - The API route delegates authentication to the `authorize` function in `lib/auth.ts`.
+
+3. **NextAuth Configuration (`lib/auth.ts`)**:
+
+   - Defines the `CredentialsProvider` for email/password authentication.
+   - Calls the `loginUser` controller to validate the credentials.
+
+4. **Controller (`loginUser.ts`)**:
+
+   - Validates that the email and password are provided.
+   - Queries the database using Prisma to find the user.
+   - Verifies the password using bcrypt.
+   - Generates a JWT token for the user.
+
+5. **Response**:
+
+   - If successful, the API returns the JWT token and user data.
+   - If there’s an error, it returns an appropriate status code and error message.
+
+6. **Frontend**:
+   - The response is processed in `lib/auth.ts`.
+   - If successful, the user is redirected to `/events`.
+   - If there’s an error, an error message is displayed to the user (e.g., "Invalid credentials").
 
 ---
 
@@ -121,7 +191,7 @@ npm test
 │   │   ├── seed.ts             # Database seed script
 │   ├── src
 │   │   ├── api                 # API routes and controllers
-│   │   ├── config              # Passport for google auth.
+│   │   ├── config              # Passport for Google OAuth
 │   │   ├── database            # Prisma client setup
 │   │   ├── docs                # Swagger configuration
 │   │   ├── server.ts           # Express server entry point
